@@ -28,7 +28,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 1,
     name: 'Alex Doe',
-    avatar: 'https://picsum.photos/seed/alex/200',
+    avatar: 'https://ui-avatars.com/api/?name=Alex+Doe&background=random&color=fff&size=200',
     bio: 'Frontend developer by day, aspiring chef by night. I love building beautiful UIs and perfecting my pasta sauce. Let\'s connect and learn together!',
     skillsToTeach: [SKILLS[0], SKILLS[5]],
     skillsToLearn: [SKILLS[3], SKILLS[9], SKILLS[12]],
@@ -48,7 +48,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 2,
     name: 'Brenda Smith',
-    avatar: 'https://picsum.photos/seed/brenda/200',
+    avatar: 'https://ui-avatars.com/api/?name=Brenda+Smith&background=random&color=fff&size=200',
     bio: 'Passionate about food and culture. I can teach you how to make authentic gnocchi and would love to learn how to build a simple website for my recipes.',
     skillsToTeach: [SKILLS[3], SKILLS[9]],
     skillsToLearn: [SKILLS[0]],
@@ -63,7 +63,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 3,
     name: 'Charlie Brown',
-    avatar: 'https://picsum.photos/seed/charlie/200',
+    avatar: 'https://ui-avatars.com/api/?name=Charlie+Brown&background=random&color=fff&size=200',
     bio: 'Data scientist who finds stories in numbers. I can help you with Python and machine learning concepts. Looking to pick up a creative hobby like guitar.',
     skillsToTeach: [SKILLS[2], SKILLS[4]],
     skillsToLearn: [SKILLS[1], SKILLS[6]],
@@ -79,7 +79,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 4,
     name: 'Diana Prince',
-    avatar: 'https://picsum.photos/seed/diana/200',
+    avatar: 'https://ui-avatars.com/api/?name=Diana+Prince&background=random&color=fff&size=200',
     bio: 'Musician and writer. I can teach you the basics of acoustic guitar. I\'m interested in learning how to analyze music trends with data science.',
     skillsToTeach: [SKILLS[1], SKILLS[7]],
     skillsToLearn: [SKILLS[4]],
@@ -94,7 +94,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 5,
     name: 'Ethan Hunt',
-    avatar: 'https://picsum.photos/seed/ethan/200',
+    avatar: 'https://ui-avatars.com/api/?name=Ethan+Hunt&background=random&color=fff&size=200',
     bio: 'Photographer and public speaker. I can teach you how to capture stunning portraits. I want to learn creative writing to tell better stories with my photos.',
     skillsToTeach: [SKILLS[6], SKILLS[8]],
     skillsToLearn: [SKILLS[7]],
@@ -110,7 +110,7 @@ export const MOCK_USERS: User[] = [
    {
     id: 6,
     name: 'Fiona Glenanne',
-    avatar: 'https://picsum.photos/seed/fiona/200',
+    avatar: 'https://ui-avatars.com/api/?name=Fiona+Glenanne&background=random&color=fff&size=200',
     bio: 'Writer and artist. I can help you with creative writing prompts and techniques. I\'m looking to learn Python to create interactive stories.',
     skillsToTeach: [SKILLS[7]],
     skillsToLearn: [SKILLS[2]],
@@ -125,7 +125,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 7,
     name: 'George King',
-    avatar: 'https://picsum.photos/seed/george/200',
+    avatar: 'https://ui-avatars.com/api/?name=George+King&background=random&color=fff&size=200',
     bio: "Public speaking coach helping people find their voice. In my free time, I'm trying to become a better photographer.",
     skillsToTeach: [SKILLS[8]],
     skillsToLearn: [SKILLS[6]],
@@ -140,7 +140,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 8,
     name: 'Hannah Montana',
-    avatar: 'https://picsum.photos/seed/hannah/200',
+    avatar: 'https://ui-avatars.com/api/?name=Hannah+Montana&background=random&color=fff&size=200',
     bio: "Creative writer and novelist. I can help you craft compelling stories. I want to learn React to build a website for my portfolio.",
     skillsToTeach: [SKILLS[7]],
     skillsToLearn: [SKILLS[0]],
@@ -155,7 +155,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 9,
     name: 'Ian Fleming',
-    avatar: 'https://picsum.photos/seed/ian/200',
+    avatar: 'https://ui-avatars.com/api/?name=Ian+Fleming&background=random&color=fff&size=200',
     bio: "Python wizard and data geek. I can automate anything! Looking to unwind by learning to play the guitar.",
     skillsToTeach: [SKILLS[2]],
     skillsToLearn: [SKILLS[1]],
@@ -171,7 +171,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 10,
     name: 'Jane Austen',
-    avatar: 'https://picsum.photos/seed/jane/200',
+    avatar: 'https://ui-avatars.com/api/?name=Jane+Austen&background=random&color=fff&size=200',
     bio: "Passionate home baker specializing in sourdough. Let's bake together! I'm hoping to improve my public speaking skills for workshops.",
     skillsToTeach: [SKILLS[9]],
     skillsToLearn: [SKILLS[8]],
@@ -186,7 +186,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 11,
     name: 'Kevin McCallister',
-    avatar: 'https://picsum.photos/seed/kevin/200',
+    avatar: 'https://ui-avatars.com/api/?name=Kevin+McCallister&background=random&color=fff&size=200',
     bio: "UI/UX designer with a passion for clean interfaces. I can teach you Figma and design principles. I want to learn Italian cooking for a trip to Italy!",
     skillsToTeach: [SKILLS[5]],
     skillsToLearn: [SKILLS[3]],
@@ -201,7 +201,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 12,
     name: 'Laura Croft',
-    avatar: 'https://picsum.photos/seed/laura/200',
+    avatar: 'https://ui-avatars.com/api/?name=Laura+Croft&background=random&color=fff&size=200',
     bio: "Adventurous photographer capturing landscapes around the world. I can teach you everything from composition to editing. Eager to learn data science to analyze photo trends.",
     skillsToTeach: [SKILLS[6]],
     skillsToLearn: [SKILLS[4]],
@@ -217,7 +217,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 13,
     name: 'Mike Ross',
-    avatar: 'https://picsum.photos/seed/mike/200',
+    avatar: 'https://ui-avatars.com/api/?name=Mike+Ross&background=random&color=fff&size=200',
     bio: "Aspiring writer looking for a mentor in creative writing. I'm a quick learner and can teach you the basics of Python.",
     skillsToTeach: [SKILLS[2]],
     skillsToLearn: [SKILLS[7]],
@@ -232,7 +232,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 14,
     name: 'Nancy Drew',
-    avatar: 'https://picsum.photos/seed/nancy/200',
+    avatar: 'https://ui-avatars.com/api/?name=Nancy+Drew&background=random&color=fff&size=200',
     bio: "Data scientist who loves solving puzzles with code. I'm looking to learn UI/UX design to make my data visualizations more impactful.",
     skillsToTeach: [SKILLS[4]],
     skillsToLearn: [SKILLS[5]],
@@ -247,7 +247,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 15,
     name: 'Oscar Wilde',
-    avatar: 'https://picsum.photos/seed/oscar/200',
+    avatar: 'https://ui-avatars.com/api/?name=Oscar+Wilde&background=random&color=fff&size=200',
     bio: "I make a mean carbonara and can teach you the secrets of Italian cuisine. I'd love to learn how to play some simple tunes on the guitar.",
     skillsToTeach: [SKILLS[3]],
     skillsToLearn: [SKILLS[1]],
@@ -263,7 +263,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 16,
     name: 'Penny Lane',
-    avatar: 'https://picsum.photos/seed/penny/200',
+    avatar: 'https://ui-avatars.com/api/?name=Penny+Lane&background=random&color=fff&size=200',
     bio: "React developer building cool web apps. I can help you get started with modern frontend development. Looking to improve my photography skills for my travel blog.",
     skillsToTeach: [SKILLS[0]],
     skillsToLearn: [SKILLS[6]],
@@ -278,7 +278,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 17,
     name: 'Quinn Rivers',
-    avatar: 'https://picsum.photos/seed/quinn/200',
+    avatar: 'https://ui-avatars.com/api/?name=Quinn+Rivers&background=random&color=fff&size=200',
     bio: 'Yoga instructor and mindfulness coach. Let\'s find our balance. I would love to learn how to create engaging video content for my classes.',
     skillsToTeach: [SKILLS[11]],
     skillsToLearn: [SKILLS[13]],
@@ -294,7 +294,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 18,
     name: 'Robert Vance',
-    avatar: 'https://picsum.photos/seed/robert/200',
+    avatar: 'https://ui-avatars.com/api/?name=Robert+Vance&background=random&color=fff&size=200',
     bio: 'Digital marketing strategist. I can teach you SEO and social media marketing. I want to learn French for an upcoming trip to Paris.',
     skillsToTeach: [SKILLS[10], SKILLS[19]],
     skillsToLearn: [SKILLS[12]],
@@ -309,7 +309,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 19,
     name: 'Samantha Carter',
-    avatar: 'https://picsum.photos/seed/samantha/200',
+    avatar: 'https://ui-avatars.com/api/?name=Samantha+Carter&background=random&color=fff&size=200',
     bio: 'Native French speaker and language tutor. Let\'s practice your conversational French! I\'m looking to improve my digital marketing skills.',
     skillsToTeach: [SKILLS[12]],
     skillsToLearn: [SKILLS[10]],
@@ -324,7 +324,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 20,
     name: 'Thomas Edison',
-    avatar: 'https://picsum.photos/seed/thomas/200',
+    avatar: 'https://ui-avatars.com/api/?name=Thomas+Edison&background=random&color=fff&size=200',
     bio: 'Project manager with Agile certification. I can help you organize your projects. I want to learn chess to improve my strategic thinking.',
     skillsToTeach: [SKILLS[14]],
     skillsToLearn: [SKILLS[15]],
@@ -339,7 +339,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 21,
     name: 'Uma Thurman',
-    avatar: 'https://picsum.photos/seed/uma/200',
+    avatar: 'https://ui-avatars.com/api/?name=Uma+Thurman&background=random&color=fff&size=200',
     bio: 'Chess enthusiast and club player. I can teach you openings and endgames. I\'m interested in data science to analyze my games.',
     skillsToTeach: [SKILLS[15]],
     skillsToLearn: [SKILLS[4]],
@@ -354,7 +354,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 22,
     name: 'Victor Laszlo',
-    avatar: 'https://picsum.photos/seed/victor/200',
+    avatar: 'https://ui-avatars.com/api/?name=Victor+Laszlo&background=random&color=fff&size=200',
     bio: 'Financial advisor helping people with budgeting and investing. I can teach you the basics of personal finance. Looking to learn gardening to relax.',
     skillsToTeach: [SKILLS[16]],
     skillsToLearn: [SKILLS[18]],
@@ -369,7 +369,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 23,
     name: 'Wendy Darling',
-    avatar: 'https://picsum.photos/seed/wendy/200',
+    avatar: 'https://ui-avatars.com/api/?name=Wendy+Darling&background=random&color=fff&size=200',
     bio: 'I have a green thumb and can teach you all about urban gardening. I\'d love to get my personal finances in order.',
     skillsToTeach: [SKILLS[18]],
     skillsToLearn: [SKILLS[16]],
@@ -384,7 +384,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 24,
     name: 'Xavier Institute',
-    avatar: 'https://picsum.photos/seed/xavier/200',
+    avatar: 'https://ui-avatars.com/api/?name=Xavier+Institute&background=random&color=fff&size=200',
     bio: 'I can knit anything from scarves to sweaters. Let me teach you! I want to learn video editing to create tutorials.',
     skillsToTeach: [SKILLS[17]],
     skillsToLearn: [SKILLS[13]],
@@ -399,7 +399,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 25,
     name: 'Yara Greyjoy',
-    avatar: 'https://picsum.photos/seed/yara/200',
+    avatar: 'https://ui-avatars.com/api/?name=Yara+Greyjoy&background=random&color=fff&size=200',
     bio: 'Video editor for a small production company. I can teach you Adobe Premiere Pro. I\'m looking to get better at photography.',
     skillsToTeach: [SKILLS[13]],
     skillsToLearn: [SKILLS[6]],
@@ -414,7 +414,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 26,
     name: 'Zelda Fitzgerald',
-    avatar: 'https://picsum.photos/seed/zelda/200',
+    avatar: 'https://ui-avatars.com/api/?name=Zelda+Fitzgerald&background=random&color=fff&size=200',
     bio: 'SEO specialist who can get you on the first page of Google. I\'d love to learn how to bake sourdough bread.',
     skillsToTeach: [SKILLS[19]],
     skillsToLearn: [SKILLS[9]],
@@ -429,7 +429,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 27,
       name: 'Arthur Dent',
-      avatar: 'https://picsum.photos/seed/arthur/200',
+      avatar: 'https://ui-avatars.com/api/?name=Arthur+Dent&background=random&color=fff&size=200',
       bio: 'Lover of tea and knitting. I can teach you the basics of knitting. Looking to improve my public speaking for work.',
       skillsToTeach: [SKILLS[17]],
       skillsToLearn: [SKILLS[8]],
@@ -444,7 +444,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 28,
       name: 'Bella Swan',
-      avatar: 'https://picsum.photos/seed/bella/200',
+      avatar: 'https://ui-avatars.com/api/?name=Bella+Swan&background=random&color=fff&size=200',
       bio: 'I can teach you how to make amazing Italian food. Looking to learn how to play guitar.',
       skillsToTeach: [SKILLS[3]],
       skillsToLearn: [SKILLS[1]],
@@ -459,7 +459,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 29,
       name: 'Clark Kent',
-      avatar: 'https://picsum.photos/seed/clark/200',
+      avatar: 'https://ui-avatars.com/api/?name=Clark+Kent&background=random&color=fff&size=200',
       bio: 'Journalist and creative writer. I can help you with your writing. I would love to learn how to take better photos.',
       skillsToTeach: [SKILLS[7]],
       skillsToLearn: [SKILLS[6]],
@@ -474,7 +474,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 30,
       name: 'Daisy Buchanan',
-      avatar: 'https://picsum.photos/seed/daisy/200',
+      avatar: 'https://ui-avatars.com/api/?name=Daisy+Buchanan&background=random&color=fff&size=200',
       bio: 'I can teach you French. Looking to learn about personal finance.',
       skillsToTeach: [SKILLS[12]],
       skillsToLearn: [SKILLS[16]],
@@ -489,7 +489,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 31,
       name: 'Edward Scissorhands',
-      avatar: 'https://picsum.photos/seed/edward/200',
+      avatar: 'https://ui-avatars.com/api/?name=Edward+Scissorhands&background=random&color=fff&size=200',
       bio: 'Expert gardener. I can help you with your garden. I would love to learn how to knit.',
       skillsToTeach: [SKILLS[18]],
       skillsToLearn: [SKILLS[17]],
@@ -504,7 +504,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 32,
       name: 'Forrest Gump',
-      avatar: 'https://picsum.photos/seed/forrest/200',
+      avatar: 'https://ui-avatars.com/api/?name=Forrest+Gump&background=random&color=fff&size=200',
       bio: 'I can run for a long time. I can teach you how to run. I want to learn how to play chess.',
       skillsToTeach: [SKILLS[8]],
       skillsToLearn: [SKILLS[15]],
@@ -519,7 +519,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 33,
       name: 'Gatsby',
-      avatar: 'https://picsum.photos/seed/gatsby/200',
+      avatar: 'https://ui-avatars.com/api/?name=Gatsby&background=random&color=fff&size=200',
       bio: 'I throw great parties. I can teach you how to be a great host. I want to learn how to invest my money.',
       skillsToTeach: [SKILLS[8]],
       skillsToLearn: [SKILLS[16]],
@@ -534,7 +534,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 34,
       name: 'Holly Golightly',
-      avatar: 'https://picsum.photos/seed/holly/200',
+      avatar: 'https://ui-avatars.com/api/?name=Holly+Golightly&background=random&color=fff&size=200',
       bio: 'I can teach you how to speak French. I want to learn how to cook Italian food.',
       skillsToTeach: [SKILLS[12]],
       skillsToLearn: [SKILLS[3]],
@@ -549,7 +549,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 35,
       name: 'Indiana Jones',
-      avatar: 'https://picsum.photos/seed/indiana/200',
+      avatar: 'https://ui-avatars.com/api/?name=Indiana+Jones&background=random&color=fff&size=200',
       bio: 'Archaeologist and professor. I can teach you about history. I want to learn how to use a computer.',
       skillsToTeach: [SKILLS[8]],
       skillsToLearn: [SKILLS[2]],
@@ -564,7 +564,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 36,
       name: 'James Bond',
-      avatar: 'https://picsum.photos/seed/james/200',
+      avatar: 'https://ui-avatars.com/api/?name=James+Bond&background=random&color=fff&size=200',
       bio: 'I can teach you how to mix the perfect martini. I want to learn how to speak French.',
       skillsToTeach: [SKILLS[8]],
       skillsToLearn: [SKILLS[12]],
@@ -579,7 +579,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 37,
       name: 'Katniss Everdeen',
-      avatar: 'https://picsum.photos/seed/katniss/200',
+      avatar: 'https://ui-avatars.com/api/?name=Katniss+Everdeen&background=random&color=fff&size=200',
       bio: 'I can teach you how to shoot a bow and arrow. I want to learn how to bake bread.',
       skillsToTeach: [SKILLS[6]],
       skillsToLearn: [SKILLS[9]],
@@ -594,7 +594,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 38,
       name: 'Luke Skywalker',
-      avatar: 'https://picsum.photos/seed/luke/200',
+      avatar: 'https://ui-avatars.com/api/?name=Luke+Skywalker&background=random&color=fff&size=200',
       bio: 'I can teach you how to use the Force. I want to learn how to fly a spaceship.',
       skillsToTeach: [SKILLS[8]],
       skillsToLearn: [SKILLS[14]],
@@ -609,7 +609,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 39,
       name: 'Marty McFly',
-      avatar: 'https://picsum.photos/seed/marty/200',
+      avatar: 'https://ui-avatars.com/api/?name=Marty+McFly&background=random&color=fff&size=200',
       bio: 'I can play the guitar. I want to learn how to skateboard.',
       skillsToTeach: [SKILLS[1]],
       skillsToLearn: [SKILLS[5]],
@@ -624,7 +624,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 40,
       name: 'Neo',
-      avatar: 'https://picsum.photos/seed/neo/200',
+      avatar: 'https://ui-avatars.com/api/?name=Neo&background=random&color=fff&size=200',
       bio: 'I know kung fu. I want to learn how to bend spoons.',
       skillsToTeach: [SKILLS[2]],
       skillsToLearn: [SKILLS[8]],
@@ -639,7 +639,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 41,
       name: 'Optimus Prime',
-      avatar: 'https://picsum.photos/seed/optimus/200',
+      avatar: 'https://ui-avatars.com/api/?name=Optimus+Prime&background=random&color=fff&size=200',
       bio: 'I can transform into a truck. I want to learn how to speak human languages.',
       skillsToTeach: [SKILLS[14]],
       skillsToLearn: [SKILLS[12]],
@@ -654,7 +654,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 42,
       name: 'Peter Pan',
-      avatar: 'https://picsum.photos/seed/peter/200',
+      avatar: 'https://ui-avatars.com/api/?name=Peter+Pan&background=random&color=fff&size=200',
       bio: 'I can fly. I want to learn how to read a map.',
       skillsToTeach: [SKILLS[7]],
       skillsToLearn: [SKILLS[14]],
@@ -669,7 +669,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 43,
       name: 'Rocky Balboa',
-      avatar: 'https://picsum.photos/seed/rocky/200',
+      avatar: 'https://ui-avatars.com/api/?name=Rocky+Balboa&background=random&color=fff&size=200',
       bio: 'I can teach you how to box. I want to learn how to cook.',
       skillsToTeach: [SKILLS[8]],
       skillsToLearn: [SKILLS[3]],
@@ -684,7 +684,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 44,
       name: 'Sarah Connor',
-      avatar: 'https://picsum.photos/seed/sarah/200',
+      avatar: 'https://ui-avatars.com/api/?name=Sarah+Connor&background=random&color=fff&size=200',
       bio: 'I can teach you how to survive the apocalypse. I want to learn how to knit.',
       skillsToTeach: [SKILLS[8]],
       skillsToLearn: [SKILLS[17]],
@@ -699,7 +699,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 45,
       name: 'Tony Stark',
-      avatar: 'https://picsum.photos/seed/tony/200',
+      avatar: 'https://ui-avatars.com/api/?name=Tony+Stark&background=random&color=fff&size=200',
       bio: 'Genius, billionaire, playboy, philanthropist. I can teach you about engineering. I want to learn how to cook.',
       skillsToTeach: [SKILLS[0], SKILLS[2]],
       skillsToLearn: [SKILLS[3]],
@@ -714,7 +714,7 @@ export const MOCK_USERS: User[] = [
   {
       id: 46,
       name: 'Walter White',
-      avatar: 'https://picsum.photos/seed/walter/200',
+      avatar: 'https://ui-avatars.com/api/?name=Walter+White&background=random&color=fff&size=200',
       bio: 'Chemistry teacher. I can teach you chemistry. I want to learn how to run a business.',
       skillsToTeach: [SKILLS[4]],
       skillsToLearn: [SKILLS[10]],
@@ -729,7 +729,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 99,
     name: 'Admin User',
-    avatar: 'https://picsum.photos/seed/admin/200',
+    avatar: 'https://ui-avatars.com/api/?name=Admin&background=random&color=fff&size=200',
     bio: 'I am the administrator of this platform.',
     skillsToTeach: [],
     skillsToLearn: [],
@@ -767,25 +767,25 @@ export const MOCK_MESSAGES: Record<number, Message[]> = {
 };
 
 export const MOCK_POSTS: Post[] = [
-    { id: 1, authorId: 4, thumbnailUrl: 'https://picsum.photos/seed/guitarpost/600/400', caption: 'Just learned a new riff on the guitar! Who wants to learn it with me? 🎸 #guitar #music', likes: 125, comments: 12 },
-    { id: 2, authorId: 2, thumbnailUrl: 'https://picsum.photos/seed/pastapost/600/400', caption: 'The perfect sourdough loaf doesn\'t exi-- 😍. So proud of this one! #baking #sourdough', likes: 340, comments: 28 },
-    { id: 3, authorId: 5, thumbnailUrl: 'https://picsum.photos/seed/photopost/600/400', caption: 'Golden hour is magic hour for portraits. Here\'s a shot from my latest session. #photography #portraits', likes: 210, comments: 19 },
-    { id: 4, authorId: 1, thumbnailUrl: 'https://picsum.photos/seed/reactpost/600/400', caption: 'Working on a new component library in React. The developer experience is 🔥. #reactdev #coding', likes: 450, comments: 55 },
-    { id: 5, authorId: 17, thumbnailUrl: 'https://picsum.photos/seed/yogapost/600/400', caption: 'Finding peace and balance with a morning yoga session. #yoga #mindfulness', likes: 180, comments: 15 },
-    { id: 6, authorId: 21, thumbnailUrl: 'https://picsum.photos/seed/chesspost/600/400', caption: 'A beautiful checkmate from my game last night. Always learning! #chess #strategy', likes: 95, comments: 8 },
-    { id: 7, authorId: 23, thumbnailUrl: 'https://picsum.photos/seed/gardenpost/600/400', caption: 'My little urban garden is thriving! Fresh herbs for days. #gardening #urbanjungle', likes: 250, comments: 22 },
-    { id: 8, authorId: 25, thumbnailUrl: 'https://picsum.photos/seed/videopost/600/400', caption: 'Experimenting with some new color grading techniques. What do you think? #videoediting #premierepro', likes: 155, comments: 14 },
-    { id: 9, authorId: 18, thumbnailUrl: 'https://picsum.photos/seed/marketingpost/600/400', caption: 'Just launched a successful SEO campaign for a client. The results are incredible! #digitalmarketing #seo', likes: 310, comments: 35 },
-    { id: 10, authorId: 31, thumbnailUrl: 'https://picsum.photos/seed/plantpost/600/400', caption: 'Propagating some succulents today. It\'s amazing to watch them grow. #plants #gardening', likes: 190, comments: 18 },
+    { id: 1, authorId: 4, thumbnailUrl: 'https://placehold.co/600x400/EEE/31343C?text=Skill+Clip', caption: 'Just learned a new riff on the guitar! Who wants to learn it with me? 🎸 #guitar #music', likes: 125, comments: 12 },
+    { id: 2, authorId: 2, thumbnailUrl: 'https://placehold.co/600x400/EEE/31343C?text=Skill+Clip', caption: 'The perfect sourdough loaf doesn\'t exi-- 😍. So proud of this one! #baking #sourdough', likes: 340, comments: 28 },
+    { id: 3, authorId: 5, thumbnailUrl: 'https://placehold.co/600x400/EEE/31343C?text=Skill+Clip', caption: 'Golden hour is magic hour for portraits. Here\'s a shot from my latest session. #photography #portraits', likes: 210, comments: 19 },
+    { id: 4, authorId: 1, thumbnailUrl: 'https://placehold.co/600x400/EEE/31343C?text=Skill+Clip', caption: 'Working on a new component library in React. The developer experience is 🔥. #reactdev #coding', likes: 450, comments: 55 },
+    { id: 5, authorId: 17, thumbnailUrl: 'https://placehold.co/600x400/EEE/31343C?text=Skill+Clip', caption: 'Finding peace and balance with a morning yoga session. #yoga #mindfulness', likes: 180, comments: 15 },
+    { id: 6, authorId: 21, thumbnailUrl: 'https://placehold.co/600x400/EEE/31343C?text=Skill+Clip', caption: 'A beautiful checkmate from my game last night. Always learning! #chess #strategy', likes: 95, comments: 8 },
+    { id: 7, authorId: 23, thumbnailUrl: 'https://placehold.co/600x400/EEE/31343C?text=Skill+Clip', caption: 'My little urban garden is thriving! Fresh herbs for days. #gardening #urbanjungle', likes: 250, comments: 22 },
+    { id: 8, authorId: 25, thumbnailUrl: 'https://placehold.co/600x400/EEE/31343C?text=Skill+Clip', caption: 'Experimenting with some new color grading techniques. What do you think? #videoediting #premierepro', likes: 155, comments: 14 },
+    { id: 9, authorId: 18, thumbnailUrl: 'https://placehold.co/600x400/EEE/31343C?text=Skill+Clip', caption: 'Just launched a successful SEO campaign for a client. The results are incredible! #digitalmarketing #seo', likes: 310, comments: 35 },
+    { id: 10, authorId: 31, thumbnailUrl: 'https://placehold.co/600x400/EEE/31343C?text=Skill+Clip', caption: 'Propagating some succulents today. It\'s amazing to watch them grow. #plants #gardening', likes: 190, comments: 18 },
 ];
 
 export const MOCK_PRODUCTS: Product[] = [
-    { id: 1, name: 'Professional React Hooks Course', imageUrl: 'https://picsum.photos/seed/reactkit/200', price: '$49.99', skillId: 1, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE1' },
-    { id: 2, name: 'Acoustic Guitar Starter Pack', imageUrl: 'https://picsum.photos/seed/guitarkit/200', price: '$129.99', skillId: 2, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE2' },
-    { id: 3, name: 'Authentic Pasta Making Kit', imageUrl: 'https://picsum.photos/seed/pastakit/200', price: '$39.99', skillId: 4, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE3' },
-    { id: 4, name: 'Sourdough Starter Kit', imageUrl: 'https://picsum.photos/seed/bakingkit/200', price: '$24.99', skillId: 10, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE4' },
-    { id: 5, name: 'DSLR Camera for Beginners', imageUrl: 'https://picsum.photos/seed/camerakit/200', price: '$499.99', skillId: 7, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE5' },
-    { id: 6, name: 'Yoga Mat and Block Set', imageUrl: 'https://picsum.photos/seed/yogakit/200', price: '$34.99', skillId: 12, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE6' },
-    { id: 7, name: 'Video Editing Software Suite', imageUrl: 'https://picsum.photos/seed/editingkit/200', price: '$99.99', skillId: 14, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE7' },
-    { id: 8, name: 'Beginner\'s Knitting Set', imageUrl: 'https://picsum.photos/seed/knitkit/200', price: '$19.99', skillId: 18, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE8' },
+    { id: 1, name: 'Professional React Hooks Course', imageUrl: 'https://placehold.co/200x200/EEE/31343C?text=Product', price: '$49.99', skillId: 1, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE1' },
+    { id: 2, name: 'Acoustic Guitar Starter Pack', imageUrl: 'https://placehold.co/200x200/EEE/31343C?text=Product', price: '$129.99', skillId: 2, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE2' },
+    { id: 3, name: 'Authentic Pasta Making Kit', imageUrl: 'https://placehold.co/200x200/EEE/31343C?text=Product', price: '$39.99', skillId: 4, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE3' },
+    { id: 4, name: 'Sourdough Starter Kit', imageUrl: 'https://placehold.co/200x200/EEE/31343C?text=Product', price: '$24.99', skillId: 10, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE4' },
+    { id: 5, name: 'DSLR Camera for Beginners', imageUrl: 'https://placehold.co/200x200/EEE/31343C?text=Product', price: '$499.99', skillId: 7, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE5' },
+    { id: 6, name: 'Yoga Mat and Block Set', imageUrl: 'https://placehold.co/200x200/EEE/31343C?text=Product', price: '$34.99', skillId: 12, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE6' },
+    { id: 7, name: 'Video Editing Software Suite', imageUrl: 'https://placehold.co/200x200/EEE/31343C?text=Product', price: '$99.99', skillId: 14, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE7' },
+    { id: 8, name: 'Beginner\'s Knitting Set', imageUrl: 'https://placehold.co/200x200/EEE/31343C?text=Product', price: '$19.99', skillId: 18, amazonUrl: 'https://amazon.com/dp/B0EXAMPLE8' },
 ];

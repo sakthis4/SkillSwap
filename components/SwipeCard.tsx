@@ -81,7 +81,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ user, currentUser, onSwipe, isInt
         )}
         
         <div className="relative h-1/2">
-            <img src={user.avatar.replace('/200', '/400')} alt={user.name} className="w-full h-full object-cover"/>
+            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover"/>
             <div className="absolute top-4 right-4 z-10">
                 <button
                 onClick={() => {

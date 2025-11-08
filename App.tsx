@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useMemo } from 'react';
 import { User, Message, Post, Match } from './types';
 import { MOCK_USERS, MOCK_MESSAGES, SKILLS, MOCK_POSTS } from './constants';
@@ -80,7 +78,7 @@ const App: React.FC = () => {
     let newUser: User = {
       ...newUserData,
       id: allUsers.length + 1,
-      avatar: `https://picsum.photos/seed/${newUserData.name.split(' ')[0]}/200`,
+      avatar: `https://ui-avatars.com/api/?name=${newUserData.name.split(' ').join('+')}&background=random&color=fff&size=200`,
       matches: [],
       status: 'online',
       level: 1,
@@ -197,7 +195,7 @@ const App: React.FC = () => {
     const newPost: Post = {
       id: Date.now(),
       authorId: currentUser.id,
-      thumbnailUrl: `https://picsum.photos/seed/newpost${Date.now()}/600/400`,
+      thumbnailUrl: `https://placehold.co/600x400/EEE/31343C?text=New+Post`,
       caption,
       likes: 0,
       comments: 0,
