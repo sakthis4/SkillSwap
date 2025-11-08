@@ -1,0 +1,8 @@
+{
+  "name": "SkillSwap AI",
+  "description": "A prototype of a skill-sharing application that matches users based on complementary skills. It features user profiles, a matching algorithm, a chat interface, and AI-powered conversation starters to help users connect.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
