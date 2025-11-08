@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { User } from '../types';
 import { View } from '../App';
@@ -41,10 +40,13 @@ const Header: React.FC<HeaderProps> = ({ currentUser, currentView, setCurrentVie
             <nav className="hidden md:block ml-10">
               <div className="flex items-baseline space-x-4">
                 <NavLink isActive={currentView === 'explore'} onClick={() => setCurrentView('explore')}>Explore</NavLink>
-                <NavLink isActive={currentView === 'feed'} onClick={() => setCurrentView('feed')}>Feed</NavLink>
                 <NavLink isActive={currentView === 'matches'} onClick={() => setCurrentView('matches')}>Matches</NavLink>
                 <NavLink isActive={currentView === 'messages'} onClick={() => setCurrentView('messages')}>Messages</NavLink>
+                <NavLink isActive={currentView === 'feed'} onClick={() => setCurrentView('feed')}>Feed</NavLink>
                 <NavLink isActive={currentView === 'profile'} onClick={() => setCurrentView('profile')}>Profile</NavLink>
+                {currentUser.isAdmin && (
+                   <NavLink isActive={currentView === 'admin'} onClick={() => setCurrentView('admin')}>Admin</NavLink>
+                )}
               </div>
             </nav>
           </div>

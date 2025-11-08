@@ -1,7 +1,14 @@
 
+
 export interface Skill {
   id: number;
   name: string;
+}
+
+export interface Match {
+  userId: number;
+  status: 'not-started' | 'in-progress' | 'completed';
+  scheduledSession?: string; // ISO date string
 }
 
 export interface User {
@@ -11,13 +18,15 @@ export interface User {
   bio: string;
   skillsToTeach: Skill[];
   skillsToLearn: Skill[];
-  matches: number[]; // Array of user IDs
+  matches: Match[]; // Array of Match objects
   status: 'online' | 'offline';
   level: number;
   xp: number;
   badges: string[];
   streak: number;
+  verifiedSkills: number[]; // Array of skill IDs
   linkedinUrl?: string;
+  isAdmin?: boolean;
 }
 
 export interface Message {
@@ -27,6 +36,7 @@ export interface Message {
     text: string;
     timestamp: string;
     reaction?: string; // e.g., '👍'
+    isSystemMessage?: boolean;
 }
 
 export interface Post {
@@ -45,4 +55,9 @@ export interface Product {
     price: string;
     skillId: number;
     amazonUrl?: string;
+}
+
+export interface SkillSuggestion {
+  skill: string;
+  reason: string;
 }

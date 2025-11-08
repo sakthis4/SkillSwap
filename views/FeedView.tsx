@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { User, Post } from '../types';
 import Avatar from '../components/Avatar';
@@ -24,7 +23,10 @@ const FeedView: React.FC<FeedViewProps> = ({ allUsers, posts, onOpenCreatePost }
           onClick={onOpenCreatePost}
           className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center space-x-2"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.55a1 1 0 011.45.89V15.1a1 1 0 01-1.45.89L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+            <path d="M4.5 5.25a2.25 2.25 0 0 0-2.25 2.25v10.5a2.25 2.25 0 0 0 2.25 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25V7.5a2.25 2.25 0 0 0-2.25-2.25H4.5Z" />
+            <path d="M19.5 6.75a.75.75 0 0 0-1.125-.632l-3.245 1.88V17.25l3.245 1.88a.75.75 0 0 0 1.125-.632V6.75Z" />
+          </svg>
           <span>Post Skill Clip</span>
         </button>
       </div>

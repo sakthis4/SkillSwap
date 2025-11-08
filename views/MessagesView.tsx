@@ -1,6 +1,7 @@
 
+
 import React from 'react';
-import { User, Message } from '../types';
+import { User, Message, Match } from '../types';
 import ChatWindow from '../components/ChatWindow';
 import Avatar from '../components/Avatar';
 
@@ -10,9 +11,10 @@ interface MessagesViewProps {
   selectedChatUser: User | null;
   setSelectedChatUser: (user: User) => void;
   messages: Message[];
-  onSendMessage: (text: string) => void;
+  onSendMessage: (text: string, isSystemMessage?: boolean) => void;
   onAddReaction: (messageId: number, reaction: string) => void;
   onStartVideoCall: (partner: User) => void;
+  onScheduleSession: (partnerId: number, sessionDate: string) => void;
 }
 
 const MessagesView: React.FC<MessagesViewProps> = ({ 
@@ -23,9 +25,10 @@ const MessagesView: React.FC<MessagesViewProps> = ({
     messages,
     onSendMessage,
     onAddReaction,
-    onStartVideoCall
+    onStartVideoCall,
+    onScheduleSession
 }) => {
-  const chatPartners = allUsers.filter(user => currentUser.matches.includes(user.id));
+  const chatPartners = allUsers.filter(user => currentUser.matches.some(m => m.userId === user.id));
 
   return (
     <div>
@@ -64,6 +67,7 @@ const MessagesView: React.FC<MessagesViewProps> = ({
                 onSendMessage={onSendMessage}
                 onAddReaction={onAddReaction}
                 onStartVideoCall={onStartVideoCall}
+                onScheduleSession={onScheduleSession}
             />
           ) : (
             <div className="flex items-center justify-center h-full">

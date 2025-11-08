@@ -6,10 +6,17 @@ interface SkillTagProps {
   skill: Skill;
   type: 'teach' | 'learn';
   isHighlighted?: boolean;
+  isVerified?: boolean;
 }
 
-const SkillTag: React.FC<SkillTagProps> = ({ skill, type, isHighlighted = false }) => {
-  const baseClasses = "px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200";
+const VerifiedIcon: React.FC = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1 inline-block text-green-600 dark:text-green-400" viewBox="0 0 20 20" fill="currentColor">
+        <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 18.333a11.954 11.954 0 007.834-13.334A1.995 1.995 0 0016 1c-2.31 0-4.438.78-6 2.053C8.438 1.78 6.31 1 4 1a1.995 1.995 0 00-1.834 3.999zM10 11.857l-3.218 1.692a.5.5 0 01-.725-.529l.614-3.582-2.6-2.534a.5.5 0 01.277-.852l3.598-.522L9.63 2.91a.5.5 0 01.894 0l1.608 3.268 3.598.522a.5.5 0 01.277.852l-2.6 2.534.614 3.582a.5.5 0 01-.725.529L10 11.857z" clipRule="evenodd" />
+    </svg>
+);
+
+const SkillTag: React.FC<SkillTagProps> = ({ skill, type, isHighlighted = false, isVerified = false }) => {
+  const baseClasses = "px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 flex items-center";
   
   const typeClasses = {
     teach: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -22,6 +29,7 @@ const SkillTag: React.FC<SkillTagProps> = ({ skill, type, isHighlighted = false 
 
   return (
     <span className={`${baseClasses} ${typeClasses[type]} ${highlightClasses}`}>
+      {isVerified && <VerifiedIcon />}
       {skill.name}
     </span>
   );

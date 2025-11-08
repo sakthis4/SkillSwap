@@ -3,10 +3,11 @@ import React from 'react';
 
 interface LoginViewProps {
   onLogin: () => void;
+  onAdminLogin: () => void;
   onShowSignUp: () => void;
 }
 
-const LoginView: React.FC<LoginViewProps> = ({ onLogin, onShowSignUp }) => {
+const LoginView: React.FC<LoginViewProps> = ({ onLogin, onAdminLogin, onShowSignUp }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <div className="max-w-md w-full text-center">
@@ -33,6 +34,12 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin, onShowSignUp }) => {
                     className="w-full bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-500/50"
                 >
                     Create a New Profile
+                </button>
+                 <button
+                    onClick={onAdminLogin}
+                    className="w-full bg-red-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-500/50 mt-4"
+                >
+                    Log In as Admin
                 </button>
             </div>
         </div>

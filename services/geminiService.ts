@@ -1,6 +1,6 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { Skill } from '../types';
+import { Skill, SkillSuggestion } from '../types';
 
 const getApiKey = () => {
     const apiKey = process.env.API_KEY;
@@ -52,5 +52,48 @@ export const getConversationStarters = async (userSkill: Skill, partnerSkill: Sk
       `Hi there! This seems like a perfect skill swap. I'm really interested in your knowledge of ${partnerSkill.name}.`,
       `This is cool, we both have something the other wants to learn! How did you get started with ${partnerSkill.name}?`
     ];
+  }
+};
+
+export const getSkillSuggestions = async (skillsToTeach: Skill[], skillsToLearn: Skill[]): Promise<SkillSuggestion[]> => {
+  try {
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    
+    const prompt = `
+      You are an AI career and skills advisor for a platform called SkillSwap AI.
+      A user has the following skills they can teach: ${skillsToTeach.map(s => s.name).join(', ')}.
+      They are interested in learning these skills: ${skillsToLearn.map(s => s.name).join(', ')}.
+      
+      Based on their profile, analyze their skill gap and suggest 3 complementary skills they should consider learning next.
+      For each suggestion, provide a brief, one-sentence reason why it's a good fit for them.
+      
+      Your response must be a JSON array of objects, where each object has a "skill" key (the name of the suggested skill)
+      and a "reason" key (the explanation).
+      Example: [{ "skill": "Project Management", "reason": "It complements your development skills by helping you lead projects effectively." }]
+      Do not include any other text or markdown formatting.
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+        }
+    });
+
+    const text = response.text.trim();
+    const suggestions = JSON.parse(text);
+    
+    // Basic validation
+    if (Array.isArray(suggestions) && suggestions.every(s => s.skill && s.reason)) {
+        return suggestions;
+    }
+
+    throw new Error("Invalid format for skill suggestions");
+
+  } catch (error) {
+    console.error("Error fetching skill suggestions:", error);
+    // Provide a fallback error response that the UI can display
+    throw new Error("Could not generate skill suggestions at this time.");
   }
 };

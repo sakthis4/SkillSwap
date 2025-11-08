@@ -1,6 +1,8 @@
 
+
+
 import React, { useState, useMemo } from 'react';
-import { User, Message, Post } from './types';
+import { User, Message, Post, Match } from './types';
 import { MOCK_USERS, MOCK_MESSAGES, SKILLS, MOCK_POSTS } from './constants';
 import Header from './components/Header';
 import ExploreView from './views/ExploreView';
@@ -9,11 +11,12 @@ import MessagesView from './views/MessagesView';
 import LoginView from './views/LoginView';
 import SignUpView from './views/SignUpView';
 import VideoCallModal from './components/VideoCallModal';
-import ProfileEditView from './views/ProfileEditView';
+import ProfileView from './views/ProfileView';
 import FeedView from './views/FeedView';
 import CreatePostModal from './components/CreatePostModal';
+import AdminView from './views/AdminView';
 
-export type View = 'explore' | 'matches' | 'messages' | 'profile' | 'feed';
+export type View = 'explore' | 'matches' | 'messages' | 'profile' | 'feed' | 'admin';
 type AuthView = 'login' | 'signup';
 
 const App: React.FC = () => {
@@ -26,20 +29,55 @@ const App: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>(MOCK_POSTS);
   const [isCreatePostModalOpen, setCreatePostModalOpen] = useState(false);
   const [exploreIndex, setExploreIndex] = useState(0);
+  
+  const updateBadges = (user: User): string[] => {
+    const newBadges = new Set(user.badges);
+
+    // Connection Badges
+    if (user.matches.length >= 1) newBadges.add('First Match');
+    if (user.matches.length >= 5) newBadges.add('Social Butterfly');
+    if (user.matches.length >= 10) newBadges.add('Super Connector');
+
+    // Teaching Badges
+    if (user.skillsToTeach.length >= 1) newBadges.add('First Lesson');
+    if (user.skillsToTeach.length >= 3) newBadges.add('Mentor');
+    if (user.skillsToTeach.length >= 5) newBadges.add('Guru');
+    
+    // Learning Badges
+    if (user.skillsToLearn.length >= 1) newBadges.add('Curious Learner');
+    if (user.skillsToLearn.length >= 3) newBadges.add('Skill Seeker');
+    if (user.skillsToLearn.length >= 5) newBadges.add('Polymath');
+
+    // Streak Badges
+    if (user.streak >= 3) newBadges.add('Consistent');
+    if (user.streak >= 7) newBadges.add('Dedicated');
+    if (user.streak >= 14) newBadges.add('Unstoppable');
+
+    return Array.from(newBadges);
+  };
 
   const handleLogin = () => {
     const user = allUsers.find(u => u.id === 1); // Login as user with ID 1
     if(user) {
       setCurrentUser(user);
+      setCurrentView('explore');
       const initialChatPartner = allUsers.find(u => u.id === 2);
       if(initialChatPartner) {
           setSelectedChatUser(initialChatPartner);
       }
     }
   };
+  
+  const handleAdminLogin = () => {
+    const adminUser = allUsers.find(u => u.isAdmin);
+    if (adminUser) {
+      setCurrentUser(adminUser);
+      setCurrentView('admin');
+    }
+  };
 
-  const handleSignUp = (newUserData: Omit<User, 'id' | 'avatar' | 'matches' | 'status' | 'level' | 'xp' | 'badges' | 'streak'>) => {
-    const newUser: User = {
+  const handleSignUp = (newUserData: Omit<User, 'id' | 'avatar' | 'matches' | 'status' | 'level' | 'xp' | 'badges' | 'streak' | 'verifiedSkills'>) => {
+    let newUser: User = {
       ...newUserData,
       id: allUsers.length + 1,
       avatar: `https://picsum.photos/seed/${newUserData.name.split(' ')[0]}/200`,
@@ -49,7 +87,9 @@ const App: React.FC = () => {
       xp: 0,
       badges: ['Newbie'],
       streak: 0,
+      verifiedSkills: [],
     };
+    newUser.badges = updateBadges(newUser);
     setAllUsers(prev => [...prev, newUser]);
     setCurrentUser(newUser);
   };
@@ -65,7 +105,7 @@ const App: React.FC = () => {
   const initialMessages = useMemo(() => MOCK_MESSAGES, []);
   const [messages, setMessages] = useState<Record<number, Message[]>>(initialMessages);
 
-  const handleSendMessage = (text: string) => {
+  const handleSendMessage = (text: string, isSystemMessage = false) => {
     if (!currentUser || !selectedChatUser) return;
     const newMessage: Message = {
       id: Date.now(),
@@ -73,6 +113,7 @@ const App: React.FC = () => {
       receiverId: selectedChatUser.id,
       text,
       timestamp: new Date().toISOString(),
+      isSystemMessage,
     };
     setMessages(prev => ({
       ...prev,
@@ -103,34 +144,31 @@ const App: React.FC = () => {
 
   const handleConnect = (targetUserId: number) => {
     if (!currentUser) return;
-
     const xpGain = 25;
     const levelUpThreshold = 100;
 
-    const updateUserXp = (user: User): Partial<User> => {
-        const newXp = user.xp + xpGain;
-        if (newXp >= levelUpThreshold) {
-            return { level: user.level + 1, xp: newXp - levelUpThreshold, streak: user.streak + 1 };
-        }
-        return { xp: newXp, streak: user.streak + 1 };
+    const getUpdatedUser = (user: User, connectedToId: number): User => {
+        const totalXp = user.xp + xpGain;
+        const newMatch: Match = { userId: connectedToId, status: 'not-started' };
+        const updatedUser = {
+            ...user,
+            matches: [...user.matches, newMatch],
+            level: user.level + Math.floor(totalXp / levelUpThreshold),
+            xp: totalXp % levelUpThreshold,
+            streak: user.streak + 1,
+        };
+        updatedUser.badges = updateBadges(updatedUser);
+        return updatedUser;
     };
 
-    const updatedCurrentUser = {
-      ...currentUser,
-      matches: [...currentUser.matches, targetUserId],
-      ...updateUserXp(currentUser),
-    };
+    const updatedCurrentUser = getUpdatedUser(currentUser, targetUserId);
     setCurrentUser(updatedCurrentUser);
 
     setAllUsers(prevUsers =>
       prevUsers.map(user => {
         if (user.id === currentUser.id) return updatedCurrentUser;
         if (user.id === targetUserId) {
-          return { 
-              ...user, 
-              matches: [...user.matches, currentUser.id],
-              ...updateUserXp(user),
-          };
+          return getUpdatedUser(user, currentUser.id);
         }
         return user;
       })
@@ -139,7 +177,8 @@ const App: React.FC = () => {
 
   const usersToExplore = useMemo(() => {
     if (!currentUser) return [];
-    return allUsers.filter(user => user.id !== currentUser.id && !currentUser.matches.includes(user.id));
+    const matchedUserIds = currentUser.matches.map(m => m.userId);
+    return allUsers.filter(user => user.id !== currentUser.id && !matchedUserIds.includes(user.id) && !user.isAdmin);
   }, [allUsers, currentUser]);
 
   const handleSwipe = (direction: 'left' | 'right', swipedUserId: number) => {
@@ -172,7 +211,113 @@ const App: React.FC = () => {
     setAllUsers(prevUsers =>
       prevUsers.map(u => (u.id === updatedProfile.id ? updatedProfile : u))
     );
-    setCurrentView('explore');
+  };
+
+  const handleUpdateMatchStatus = (partnerId: number, status: Match['status']) => {
+    const xpGainOnComplete = 50;
+    const levelUpThreshold = 100;
+
+    const updateUser = (user: User): User => {
+      let finalUser = {
+        ...user,
+        matches: user.matches.map(m => m.userId === partnerId ? { ...m, status } : m)
+      };
+
+      if (status === 'completed') {
+        const totalXp = finalUser.xp + xpGainOnComplete;
+        finalUser = {
+            ...finalUser,
+            level: finalUser.level + Math.floor(totalXp / levelUpThreshold),
+            xp: totalXp % levelUpThreshold,
+        };
+        finalUser.badges = updateBadges(finalUser);
+      }
+      return finalUser;
+    };
+    
+    if (currentUser) {
+        const updatedCurrentUser = updateUser(currentUser);
+        setCurrentUser(updatedCurrentUser);
+
+        setAllUsers(prevUsers => prevUsers.map(u => {
+            if (u.id === currentUser.id) return updatedCurrentUser;
+            if (u.id === partnerId) return updateUser(u);
+            return u;
+        }));
+    }
+  };
+
+  const handleScheduleSession = (partnerId: number, sessionDate: string) => {
+      const formattedDate = new Date(sessionDate).toLocaleString([], {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+      });
+      const systemMessage = `Session scheduled for ${formattedDate}`;
+
+      const updateUser = (user: User): User => ({
+          ...user,
+          matches: user.matches.map(m => m.userId === partnerId ? { ...m, scheduledSession: sessionDate } : m)
+      });
+      
+      if(currentUser && selectedChatUser && selectedChatUser.id === partnerId) {
+          const updatedCurrentUser = updateUser(currentUser);
+          setCurrentUser(updatedCurrentUser);
+          setAllUsers(prev => prev.map(u => {
+              if (u.id === currentUser.id) return updatedCurrentUser;
+              if (u.id === partnerId) return updateUser(u);
+              return u;
+          }));
+          handleSendMessage(systemMessage, true);
+      }
+  };
+
+  const handleDeleteUser = (userIdToDelete: number) => {
+    if (!window.confirm(`Are you sure you want to permanently delete this user and all their data? This action cannot be undone.`)) {
+      return;
+    }
+
+    setPosts(prev => prev.filter(p => p.authorId !== userIdToDelete));
+
+    setMessages(prev => {
+      const newMessages = { ...prev };
+      delete newMessages[userIdToDelete];
+      for (const partnerId in newMessages) {
+        newMessages[partnerId] = newMessages[partnerId].filter(
+          msg => msg.senderId !== userIdToDelete && msg.receiverId !== userIdToDelete
+        );
+      }
+      return newMessages;
+    });
+
+    setAllUsers(prevUsers =>
+      prevUsers
+        .filter(user => user.id !== userIdToDelete)
+        .map(user => ({
+          ...user,
+          matches: user.matches.filter(match => match.userId !== userIdToDelete)
+        }))
+    );
+    
+    if (currentUser && currentUser.id !== userIdToDelete) {
+      setCurrentUser(prevUser => {
+        if (!prevUser) return null;
+        return {
+          ...prevUser,
+          matches: prevUser.matches.filter(match => match.userId !== userIdToDelete),
+        }
+      });
+    }
+
+    if (selectedChatUser && selectedChatUser.id === userIdToDelete) {
+        setSelectedChatUser(null);
+    }
+  };
+
+  const handleDeletePost = (postIdToDelete: number) => {
+      if (!window.confirm('Are you sure you want to delete this post?')) {
+          return;
+      }
+      setPosts(prev => prev.filter(p => p.id !== postIdToDelete));
   };
 
 
@@ -180,7 +325,7 @@ const App: React.FC = () => {
     if (authView === 'signup') {
         return <SignUpView onSignUp={handleSignUp} onShowLogin={() => setAuthView('login')} allSkills={SKILLS} />
     }
-    return <LoginView onLogin={handleLogin} onShowSignUp={() => setAuthView('signup')} />;
+    return <LoginView onLogin={handleLogin} onAdminLogin={handleAdminLogin} onShowSignUp={() => setAuthView('signup')} />;
   }
 
   return (
@@ -201,9 +346,9 @@ const App: React.FC = () => {
                 onGoBack={handleGoBack}
             />
         )}
-        {currentView === 'matches' && <MatchesView currentUser={currentUser} allUsers={allUsers} />}
+        {currentView === 'matches' && <MatchesView currentUser={currentUser} allUsers={allUsers} onUpdateStatus={handleUpdateMatchStatus} />}
         {currentView === 'feed' && <FeedView currentUser={currentUser} allUsers={allUsers} posts={posts} onOpenCreatePost={() => setCreatePostModalOpen(true)} />}
-        {currentView === 'profile' && <ProfileEditView currentUser={currentUser} onSave={handleProfileSave} allSkills={SKILLS} />}
+        {currentView === 'profile' && <ProfileView currentUser={currentUser} onSave={handleProfileSave} allSkills={SKILLS} />}
         {currentView === 'messages' && (
           <MessagesView 
             currentUser={currentUser}
@@ -214,7 +359,17 @@ const App: React.FC = () => {
             onSendMessage={handleSendMessage}
             onAddReaction={handleAddReaction}
             onStartVideoCall={handleStartVideoCall}
+            onScheduleSession={handleScheduleSession}
           />
+        )}
+        {currentView === 'admin' && currentUser.isAdmin && (
+            <AdminView
+                currentUser={currentUser}
+                allUsers={allUsers}
+                posts={posts}
+                onDeleteUser={handleDeleteUser}
+                onDeletePost={handleDeletePost}
+            />
         )}
       </main>
       {videoCallPartner && <VideoCallModal partner={videoCallPartner} onClose={handleEndVideoCall} />}

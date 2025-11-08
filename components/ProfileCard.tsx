@@ -1,6 +1,7 @@
 
+
 import React from 'react';
-import { User, Skill, Product } from '../types';
+import { User, Skill, Product, Match } from '../types';
 import { MOCK_PRODUCTS } from '../constants';
 import SkillTag from './SkillTag';
 import Avatar from './Avatar';
@@ -9,19 +10,46 @@ interface ProfileCardProps {
   user: User;
   currentUser: User;
   onConnect?: (userId: number) => void;
+  matchDetails?: Match;
+  onUpdateStatus?: (partnerId: number, status: Match['status']) => void;
 }
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect }) => {
-  const isConnected = currentUser.matches.includes(user.id);
+const statusConfig = {
+    'not-started': { text: 'Not Started', color: 'bg-gray-400', buttonText: 'Start Swap', nextStatus: 'in-progress' },
+    'in-progress': { text: 'In Progress', color: 'bg-yellow-500', buttonText: 'Mark as Complete', nextStatus: 'completed' },
+    'completed': { text: 'Completed', color: 'bg-green-500', buttonText: null, nextStatus: null },
+};
+
+
+const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect, matchDetails, onUpdateStatus }) => {
+  const isConnected = currentUser.matches.some(m => m.userId === user.id);
   const recommendedProducts = MOCK_PRODUCTS.filter(p => user.skillsToTeach.some(s => s.id === p.skillId));
   
   const isSkillMatch = (skill: Skill, skillsList: Skill[]) => {
       return skillsList.some(s => s.id === skill.id);
   }
 
+  const currentStatusConfig = matchDetails ? statusConfig[matchDetails.status] : null;
+
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 transition-transform hover:scale-105 duration-300 flex flex-col`}>
-      <div className="p-6 flex-grow">
+    <div className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 transition-transform hover:scale-105 duration-300 flex flex-col`}>
+      <div className="absolute top-4 right-4 z-10">
+        <button
+          onClick={() => {
+            if (window.confirm(`Are you sure you want to report ${user.name}? This action cannot be undone.`)) {
+              alert(`${user.name} has been reported for review. Thank you for helping keep SkillSwap safe.`);
+            }
+          }}
+          className="p-2 rounded-full bg-gray-100/50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 hover:bg-gray-200 hover:text-red-500 dark:hover:bg-gray-700 dark:hover:text-red-400 transition-colors"
+          aria-label={`Report ${user.name}`}
+          title="Report user"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clipRule="evenodd" />
+            </svg>
+        </button>
+      </div>
+      <div className="p-6 flex-grow flex flex-col">
         <div className="flex items-start justify-between mb-4">
             <div className="flex items-center">
                 <Avatar user={user} size="lg" showStatus={true} />
@@ -48,7 +76,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect 
             <p className="text-xs text-right text-gray-500 dark:text-gray-400 mt-1">{user.xp}/100 XP to next level</p>
         </div>
         
-        <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">{user.bio}</p>
+        <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm flex-grow">{user.bio}</p>
 
         <div className="space-y-4">
           <div>
@@ -63,7 +91,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect 
             <h4 className="font-semibold text-gray-700 dark:text-gray-200 mb-2">Can Teach:</h4>
             <div className="flex flex-wrap gap-2">
               {user.skillsToTeach.map(skill => (
-                <SkillTag key={skill.id} skill={skill} type="teach" isHighlighted={isSkillMatch(skill, currentUser.skillsToLearn)} />
+                <SkillTag 
+                    key={skill.id} 
+                    skill={skill} 
+                    type="teach" 
+                    isHighlighted={isSkillMatch(skill, currentUser.skillsToLearn)} 
+                    isVerified={user.verifiedSkills.includes(skill.id)}
+                />
               ))}
             </div>
           </div>
@@ -96,6 +130,29 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect 
             </div>
         )}
       </div>
+
+      {matchDetails && onUpdateStatus && (
+        <div className="bg-gray-100 dark:bg-gray-800/50 p-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+          <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Swap Progress</h5>
+          <div className="flex items-center space-x-2">
+            <span className={`w-3 h-3 rounded-full ${currentStatusConfig?.color}`}></span>
+            <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{currentStatusConfig?.text}</span>
+          </div>
+          {matchDetails.scheduledSession && (
+             <div className="text-xs text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-md">
+                <strong>Next Session:</strong> {new Date(matchDetails.scheduledSession).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+             </div>
+          )}
+          {currentStatusConfig?.buttonText && currentStatusConfig.nextStatus && (
+            <button
+              onClick={() => onUpdateStatus(user.id, currentStatusConfig.nextStatus as Match['status'])}
+              className="w-full text-sm font-bold py-1.5 px-4 rounded-lg transition-colors duration-300 bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {currentStatusConfig.buttonText}
+            </button>
+          )}
+        </div>
+      )}
 
       {recommendedProducts.length > 0 && (
           <div className="bg-gray-50 dark:bg-gray-900/50 p-4 border-t border-gray-200 dark:border-gray-700">

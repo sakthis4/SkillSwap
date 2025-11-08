@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { User, Message } from '../types';
 import { getConversationStarters } from '../services/geminiService';
@@ -8,12 +7,13 @@ interface ChatWindowProps {
   currentUser: User;
   partner: User;
   messages: Message[];
-  onSendMessage: (text: string) => void;
+  onSendMessage: (text: string, isSystemMessage?: boolean) => void;
   onAddReaction: (messageId: number, reaction: string) => void;
   onStartVideoCall: (partner: User) => void;
+  onScheduleSession: (partnerId: number, sessionDate: string) => void;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages, onSendMessage, onAddReaction, onStartVideoCall }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages, onSendMessage, onAddReaction, onStartVideoCall, onScheduleSession }) => {
   const [inputText, setInputText] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
@@ -34,6 +34,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages,
       setSuggestions([]);
     }
   };
+  
+  const handleScheduleClick = () => {
+    const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const sessionDate = nextWeek.toISOString();
+    onScheduleSession(partner.id, sessionDate);
+  }
 
   const fetchSuggestions = async () => {
     setIsLoadingSuggestions(true);
@@ -60,41 +66,50 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages,
             </div>
         </div>
         <div className="flex items-center space-x-2">
-            <button disabled title="Start Group Call (Coming Soon!)" className="p-2 rounded-full text-gray-400 dark:text-gray-500 cursor-not-allowed" >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a3.001 3.001 0 015.688 0M12 14a4 4 0 100-8 4 4 0 000 8z" /></svg>
+            <button onClick={handleScheduleClick} className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-blue-500 transition-colors" title="Schedule Session">
+               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+               </svg>
             </button>
-            <button onClick={() => onStartVideoCall(partner)} className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-blue-500 transition-colors" title="Join Live Session (Zoom-integrated)">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.55a1 1 0 011.45.89V15.1a1 1 0 01-1.45.89L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
+            <button onClick={() => onStartVideoCall(partner)} className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-blue-500 transition-colors" title="Start Video Call">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6">
+                <path d="M4.5 5.25a2.25 2.25 0 0 0-2.25 2.25v10.5a2.25 2.25 0 0 0 2.25 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25V7.5a2.25 2.25 0 0 0-2.25-2.25H4.5Z" />
+                <path d="M19.5 6.75a.75.75 0 0 0-1.125-.632l-3.245 1.88V17.25l3.245 1.88a.75.75 0 0 0 1.125-.632V6.75Z" />
+              </svg>
             </button>
         </div>
       </div>
 
       <div className="flex-1 p-6 overflow-y-auto">
-        {messages.map((msg) => (
-          <div key={msg.id} className={`flex items-end mb-4 group ${msg.senderId === currentUser.id ? 'justify-end' : 'justify-start'}`}>
-            {msg.senderId !== currentUser.id && <Avatar user={partner} size="sm" />}
-            <div className="relative mx-2">
-                <div className={`p-3 rounded-lg max-w-xs lg:max-w-md ${msg.senderId === currentUser.id ? 'bg-blue-600 text-white rounded-br-none' : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none'}`}>
-                    {msg.text}
+        {messages.map((msg) => 
+            msg.isSystemMessage ? (
+                <div key={msg.id} className="text-center my-4">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">{msg.text}</span>
                 </div>
-                <div className={`absolute -top-8 rounded-full shadow-lg p-1 flex space-x-1 border bg-white dark:bg-gray-700 dark:border-gray-600 opacity-0 group-hover:opacity-100 transition-opacity z-10 ${msg.senderId === currentUser.id ? 'right-2' : 'left-2'}`}>
-                    {reactionEmojis.map(emoji => (
-                        <button key={emoji} onClick={() => onAddReaction(msg.id, emoji)} className="text-lg p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-transform hover:scale-125">
-                            {emoji}
-                        </button>
-                    ))}
-                </div>
-                {msg.reaction && (
-                    <div className={`absolute -bottom-3 rounded-full shadow-md text-sm p-0.5 border bg-white dark:bg-gray-700 dark:border-gray-600 ${msg.senderId === currentUser.id ? 'left-2' : 'right-2'}`}>
-                        {msg.reaction}
+            ) : (
+                <div key={msg.id} className={`flex items-end mb-4 group ${msg.senderId === currentUser.id ? 'justify-end' : 'justify-start'}`}>
+                    {msg.senderId !== currentUser.id && <Avatar user={partner} size="sm" />}
+                    <div className="relative mx-2">
+                        <div className={`p-3 rounded-lg max-w-xs lg:max-w-md ${msg.senderId === currentUser.id ? 'bg-blue-600 text-white rounded-br-none' : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none'}`}>
+                            {msg.text}
+                        </div>
+                        <div className={`absolute -top-8 rounded-full shadow-lg p-1 flex space-x-1 border bg-white dark:bg-gray-700 dark:border-gray-600 opacity-0 group-hover:opacity-100 transition-opacity z-10 ${msg.senderId === currentUser.id ? 'right-2' : 'left-2'}`}>
+                            {reactionEmojis.map(emoji => (
+                                <button key={emoji} onClick={() => onAddReaction(msg.id, emoji)} className="text-lg p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-transform hover:scale-125">
+                                    {emoji}
+                                </button>
+                            ))}
+                        </div>
+                        {msg.reaction && (
+                            <div className={`absolute -bottom-3 rounded-full shadow-md text-sm p-0.5 border bg-white dark:bg-gray-700 dark:border-gray-600 ${msg.senderId === currentUser.id ? 'left-2' : 'right-2'}`}>
+                                {msg.reaction}
+                            </div>
+                        )}
                     </div>
-                )}
-            </div>
-             {msg.senderId === currentUser.id && <Avatar user={currentUser} size="sm" />}
-          </div>
-        ))}
+                    {msg.senderId === currentUser.id && <Avatar user={currentUser} size="sm" />}
+                </div>
+            )
+        )}
         <div ref={messagesEndRef} />
       </div>
 

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { User, Skill } from '../types';
 
 interface SignUpViewProps {
-  onSignUp: (newUserData: Omit<User, 'id' | 'avatar' | 'matches' | 'status' | 'level' | 'xp' | 'badges' | 'streak'>) => void;
+  onSignUp: (newUserData: Omit<User, 'id' | 'avatar' | 'matches' | 'status' | 'level' | 'xp' | 'badges' | 'streak' | 'verifiedSkills'>) => void;
   onShowLogin: () => void;
   allSkills: Skill[];
 }

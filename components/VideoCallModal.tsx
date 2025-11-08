@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { User } from '../types';
 
@@ -11,6 +10,7 @@ const VideoCallModal: React.FC<VideoCallModalProps> = ({ partner, onClose }) => 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [isCameraError, setIsCameraError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const startCamera = async () => {
@@ -20,9 +20,21 @@ const VideoCallModal: React.FC<VideoCallModalProps> = ({ partner, onClose }) => 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
+        setIsCameraError(false);
       } catch (err) {
         console.error("Error accessing camera:", err);
         setIsCameraError(true);
+        if (err instanceof DOMException) {
+          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            setErrorMessage('Camera access was denied. Please allow access in your browser settings to use video chat.');
+          } else if (err.name === 'NotFoundError') {
+            setErrorMessage('No camera or microphone found. Please check that they are connected and enabled.');
+          } else {
+            setErrorMessage('Could not access camera. It might be used by another application.');
+          }
+        } else {
+          setErrorMessage('An unexpected error occurred while accessing the camera.');
+        }
       }
     };
 
@@ -71,7 +83,7 @@ const VideoCallModal: React.FC<VideoCallModalProps> = ({ partner, onClose }) => 
                 {isCameraError ? (
                     <div className="text-center text-red-400 p-4">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /><path d="M15 10l4.55a1 1 0 011.45.89V15.1a1 1 0 01-1.45.89L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                        Could not access camera. Please check permissions.
+                        {errorMessage}
                     </div>
                 ) : (
                     <video ref={videoRef} autoPlay muted className="w-full h-full object-cover transform -scale-x-100"></video>

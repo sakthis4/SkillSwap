@@ -1,28 +1,35 @@
 
+
 import React from 'react';
-import { User } from '../types';
+import { User, Match } from '../types';
 import ProfileCard from '../components/ProfileCard';
 
 interface MatchesViewProps {
   currentUser: User;
   allUsers: User[];
+  onUpdateStatus: (partnerId: number, status: Match['status']) => void;
 }
 
-const MatchesView: React.FC<MatchesViewProps> = ({ currentUser, allUsers }) => {
-  const matchedUsers = allUsers.filter(user => currentUser.matches.includes(user.id));
+const MatchesView: React.FC<MatchesViewProps> = ({ currentUser, allUsers, onUpdateStatus }) => {
+  const matchedUsers = currentUser.matches.map(match => {
+    const user = allUsers.find(u => u.id === match.userId);
+    return { user, matchDetails: match };
+  }).filter(item => item.user);
 
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Your Matches</h1>
-      <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">These are the people you've connected with. Start a conversation!</p>
+      <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">These are the people you've connected with. Track your progress and start a conversation!</p>
       
       {matchedUsers.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {matchedUsers.map(user => (
+          {matchedUsers.map(({ user, matchDetails }) => user && (
             <ProfileCard 
               key={user.id} 
               user={user} 
-              currentUser={currentUser} 
+              currentUser={currentUser}
+              matchDetails={matchDetails}
+              onUpdateStatus={onUpdateStatus}
             />
           ))}
         </div>

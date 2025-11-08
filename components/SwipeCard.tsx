@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { User } from '../types';
 import SkillTag from './SkillTag';
@@ -81,6 +82,22 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ user, currentUser, onSwipe, isInt
         
         <div className="relative h-1/2">
             <img src={user.avatar.replace('/200', '/400')} alt={user.name} className="w-full h-full object-cover"/>
+            <div className="absolute top-4 right-4 z-10">
+                <button
+                onClick={() => {
+                    if (window.confirm(`Are you sure you want to report ${user.name}?`)) {
+                    alert(`${user.name} has been reported. Thank you for your feedback.`);
+                    }
+                }}
+                className="p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
+                aria-label={`Report ${user.name}`}
+                title="Report user"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clipRule="evenodd" />
+                    </svg>
+                </button>
+            </div>
             <div className="absolute bottom-0 w-full p-4 bg-gradient-to-t from-black/80 to-transparent text-white">
                 <h2 className="text-3xl font-bold">{user.name}</h2>
                 <p className="font-semibold">Level {user.level}</p>
@@ -93,7 +110,13 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ user, currentUser, onSwipe, isInt
                 <h4 className="font-semibold text-gray-700 dark:text-gray-200 mb-2 text-sm">Can Teach:</h4>
                 <div className="flex flex-wrap gap-2">
                 {user.skillsToTeach.map(skill => (
-                    <SkillTag key={skill.id} skill={skill} type="teach" isHighlighted={isSkillMatch(skill, currentUser.skillsToLearn)} />
+                    <SkillTag 
+                        key={skill.id} 
+                        skill={skill} 
+                        type="teach" 
+                        isHighlighted={isSkillMatch(skill, currentUser.skillsToLearn)} 
+                        isVerified={user.verifiedSkills.includes(skill.id)}
+                    />
                 ))}
                 </div>
             </div>
