@@ -1,4 +1,5 @@
 
+
 export interface Skill {
   id: number;
   name: string;
@@ -19,6 +20,7 @@ export interface Match {
   status: 'not-started' | 'in-progress' | 'completed';
   scheduledSession?: string; // ISO date string
   sessionProposal?: SessionProposal;
+  rating?: number; // Rating given by the user for this swap (1-5)
 }
 
 export interface User {
@@ -37,6 +39,8 @@ export interface User {
   verifiedSkills: number[]; // Array of skill IDs
   linkedinUrl?: string;
   isAdmin?: boolean;
+  teacherRating?: number; // Average rating as a teacher
+  totalRatings?: number; // Total number of ratings received
 }
 
 export interface Message {

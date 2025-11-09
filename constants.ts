@@ -40,7 +40,7 @@ export const MOCK_USERS: User[] = [
     skillsToLearn: [SKILLS[3], SKILLS[9], SKILLS[12], SKILLS[6]],
     matches: [
       { userId: 2, status: 'in-progress', scheduledSession: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString() },
-      { userId: 4, status: 'completed', scheduledSession: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+      { userId: 4, status: 'completed', scheduledSession: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), rating: 5 },
       { userId: 17, status: 'not-started', scheduledSession: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() },
       { userId: 5, status: 'in-progress', scheduledSession: getTodayAtTime(10) },
       { userId: 16, status: 'in-progress', scheduledSession: getTodayAtTime(14) },
@@ -61,6 +61,8 @@ export const MOCK_USERS: User[] = [
     streak: 3,
     verifiedSkills: [1],
     linkedinUrl: 'https://www.linkedin.com/in/aditi-sharma-example',
+    teacherRating: 4.0,
+    totalRatings: 1,
   },
   {
     id: 2,
@@ -76,6 +78,8 @@ export const MOCK_USERS: User[] = [
     badges: ['Pasta Master', 'Baker', 'First Match', 'First Lesson', 'Curious Learner'],
     streak: 2,
     verifiedSkills: [4, 10],
+    teacherRating: 0,
+    totalRatings: 0,
   },
   {
     id: 3,
@@ -92,6 +96,8 @@ export const MOCK_USERS: User[] = [
     streak: 0,
     verifiedSkills: [3],
     linkedinUrl: 'https://www.linkedin.com/in/priya-patel-example',
+    teacherRating: 4.8,
+    totalRatings: 12,
   },
   {
     id: 4,
@@ -100,13 +106,15 @@ export const MOCK_USERS: User[] = [
     bio: 'Musician and writer. I can teach you the basics of acoustic guitar. I\'m interested in learning how to analyze music trends with data science.',
     skillsToTeach: [{ ...SKILLS[1], proficiency: 2 }, { ...SKILLS[7], proficiency: 3 }],
     skillsToLearn: [SKILLS[4]],
-    matches: [{ userId: 1, status: 'completed', scheduledSession: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() }],
+    matches: [{ userId: 1, status: 'completed', scheduledSession: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), rating: 4 }],
     status: 'online',
     level: 6,
     xp: 20,
     badges: ['Guitar Hero', 'Top Teacher', 'First Match', 'First Lesson', 'Curious Learner', 'Consistent'],
     streak: 5,
     verifiedSkills: [2],
+    teacherRating: 5.0,
+    totalRatings: 1,
   },
   {
     id: 5,
@@ -126,6 +134,8 @@ export const MOCK_USERS: User[] = [
     streak: 1,
     verifiedSkills: [],
     linkedinUrl: 'https://www.linkedin.com/in/anjali-mehta-example',
+    teacherRating: 4.6,
+    totalRatings: 8,
   },
    {
     id: 6,
@@ -156,6 +166,8 @@ export const MOCK_USERS: User[] = [
     badges: ['Orator', 'Motivator', 'First Lesson', 'Curious Learner', 'Consistent'],
     streak: 4,
     verifiedSkills: [9],
+    teacherRating: 4.9,
+    totalRatings: 25,
   },
   {
     id: 8,
@@ -187,6 +199,8 @@ export const MOCK_USERS: User[] = [
     streak: 10,
     verifiedSkills: [3],
     linkedinUrl: 'https://www.linkedin.com/in/kavya-rao-example',
+    teacherRating: 4.7,
+    totalRatings: 15,
   },
   {
     id: 10,
@@ -235,6 +249,8 @@ export const MOCK_USERS: User[] = [
     streak: 8,
     verifiedSkills: [7],
     linkedinUrl: 'https://www.linkedin.com/in/rajesh-nair-example',
+    teacherRating: 5.0,
+    totalRatings: 3,
   },
   {
     id: 13,
@@ -296,6 +312,8 @@ export const MOCK_USERS: User[] = [
     badges: ['React Rockstar', 'First Lesson', 'Curious Learner', 'Consistent'],
     streak: 6,
     verifiedSkills: [1],
+    teacherRating: 4.5,
+    totalRatings: 4,
   },
   {
     id: 17,

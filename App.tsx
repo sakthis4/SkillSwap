@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo } from 'react';
 import { User, Message, Post, Match, ManualCalendarEvent, SessionProposal } from './types';
 import { MOCK_USERS, MOCK_MESSAGES, SKILLS, MOCK_POSTS } from './constants';
@@ -96,6 +97,8 @@ const App: React.FC = () => {
       badges: ['Newbie'],
       streak: 0,
       verifiedSkills: [],
+      teacherRating: 0,
+      totalRatings: 0,
     };
     newUser.badges = updateBadges(newUser);
     setAllUsers(prev => [...prev, newUser]);
@@ -187,7 +190,9 @@ const App: React.FC = () => {
   const usersToExplore = useMemo(() => {
     if (!currentUser) return [];
     const matchedUserIds = currentUser.matches.map(m => m.userId);
-    return allUsers.filter(user => user.id !== currentUser.id && !matchedUserIds.includes(user.id) && !user.isAdmin);
+    return allUsers
+      .filter(user => user.id !== currentUser.id && !matchedUserIds.includes(user.id) && !user.isAdmin)
+      .sort((a, b) => (b.teacherRating || 0) - (a.teacherRating || 0));
   }, [allUsers, currentUser]);
 
   const handleSwipe = (direction: 'left' | 'right', swipedUserId: number) => {
@@ -255,6 +260,35 @@ const App: React.FC = () => {
         }));
     }
   };
+  
+    const handleRateSession = (partnerId: number, rating: number) => {
+        if (!currentUser) return;
+
+        // Update the partner's rating
+        setAllUsers(prevUsers => prevUsers.map(user => {
+            if (user.id === partnerId) {
+                const oldTotalRatings = user.totalRatings || 0;
+                const oldRatingTotal = (user.teacherRating || 0) * oldTotalRatings;
+                const newTotalRatings = oldTotalRatings + 1;
+                const newTeacherRating = (oldRatingTotal + rating) / newTotalRatings;
+                return {
+                    ...user,
+                    teacherRating: newTeacherRating,
+                    totalRatings: newTotalRatings,
+                };
+            }
+            return user;
+        }));
+
+        // Update the current user's match to show they have rated
+        const updatedCurrentUser = {
+            ...currentUser,
+            matches: currentUser.matches.map(match =>
+                match.userId === partnerId ? { ...match, rating } : match
+            ),
+        };
+        setCurrentUser(updatedCurrentUser);
+    };
 
   const handleScheduleSession = (partnerId: number, sessionDate: string) => {
       if (!currentUser) return;
@@ -419,7 +453,7 @@ const App: React.FC = () => {
                 allSkills={SKILLS}
             />
         )}
-        {currentView === 'matches' && <MatchesView currentUser={currentUser} allUsers={allUsers} onUpdateStatus={handleUpdateMatchStatus} onSessionProposalResponse={handleSessionProposalResponse} allSkills={SKILLS}/>}
+        {currentView === 'matches' && <MatchesView currentUser={currentUser} allUsers={allUsers} onUpdateStatus={handleUpdateMatchStatus} onSessionProposalResponse={handleSessionProposalResponse} allSkills={SKILLS} onRateSession={handleRateSession}/>}
         {currentView === 'feed' && <FeedView currentUser={currentUser} allUsers={allUsers} posts={posts} onOpenCreatePost={() => setCreatePostModalOpen(true)} />}
         {currentView === 'profile' && <ProfileView currentUser={currentUser} onSave={handleProfileSave} allSkills={SKILLS} />}
         {currentView === 'library' && <LibraryView allSkills={SKILLS} allUsers={allUsers} />}

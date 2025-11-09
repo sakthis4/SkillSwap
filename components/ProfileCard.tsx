@@ -1,5 +1,6 @@
 
-import React from 'react';
+
+import React, { useState } from 'react';
 import { User, Skill, Product, Match, UserSkill } from '../types';
 import { MOCK_PRODUCTS } from '../constants';
 import SkillTag from './SkillTag';
@@ -14,6 +15,7 @@ interface ProfileCardProps {
   matchDetails?: Match;
   onUpdateStatus?: (partnerId: number, status: Match['status']) => void;
   onSessionProposalResponse?: (partnerId: number, response: 'accepted' | 'declined') => void;
+  onRateSession?: (partnerId: number, rating: number) => void;
   allSkills: Skill[];
 }
 
@@ -23,8 +25,64 @@ const statusConfig = {
     'completed': { text: 'Completed', color: 'bg-green-500', buttonText: null, nextStatus: null },
 };
 
+const Star: React.FC<{
+    filled: boolean;
+    onClick?: () => void;
+    onMouseEnter?: () => void;
+    onMouseLeave?: () => void;
+}> = ({ filled, onClick, onMouseEnter, onMouseLeave }) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        className={`h-6 w-6 cursor-pointer ${filled ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-500'}`} 
+        viewBox="0 0 20 20" 
+        fill="currentColor"
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+    >
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+);
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect, matchDetails, onUpdateStatus, onSessionProposalResponse, allSkills }) => {
+
+const InteractiveStarRating: React.FC<{ onRate: (rating: number) => void }> = ({ onRate }) => {
+    const [rating, setRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+
+    return (
+        <div className="flex flex-col items-center">
+            <div className="flex" onMouseLeave={() => setHoverRating(0)}>
+                {[1, 2, 3, 4, 5].map(star => (
+                    <Star
+                        key={star}
+                        filled={(hoverRating || rating) >= star}
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                    />
+                ))}
+            </div>
+            {rating > 0 && (
+                <button
+                    onClick={() => onRate(rating)}
+                    className="mt-3 text-xs font-bold py-1 px-3 rounded-md transition-colors bg-blue-600 text-white hover:bg-blue-700"
+                >
+                    Submit Rating
+                </button>
+            )}
+        </div>
+    );
+};
+
+const ReadOnlyStarRating: React.FC<{ rating: number }> = ({ rating }) => (
+    <div className="flex">
+        {[1, 2, 3, 4, 5].map(star => (
+            <Star key={star} filled={rating >= star} />
+        ))}
+    </div>
+);
+
+
+const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect, matchDetails, onUpdateStatus, onSessionProposalResponse, onRateSession, allSkills }) => {
   const isConnected = currentUser.matches.some(m => m.userId === user.id);
   const recommendedProducts = MOCK_PRODUCTS.filter(p => user.skillsToTeach.some(s => s.id === p.skillId));
   
@@ -88,7 +146,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect,
                             </a>
                         )}
                     </div>
-                    <p className="text-sm font-semibold text-blue-500">Level {user.level}</p>
+                    <div className="flex items-center space-x-2">
+                        <p className="text-sm font-semibold text-blue-500">Level {user.level}</p>
+                        {user.totalRatings > 0 && (
+                            <div className="flex items-center text-xs font-bold text-yellow-600 dark:text-yellow-400" title={`Teacher Rating: ${user.teacherRating?.toFixed(1)} out of 5 stars from ${user.totalRatings} ratings`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-0.5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                <span>{user.teacherRating?.toFixed(1)}</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
@@ -205,6 +271,24 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect,
                         <button onClick={() => handleAddToCalendar('google')} className="flex-1 text-xs font-semibold py-1 px-2 rounded-md bg-white dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors">Add to Google</button>
                         <button onClick={() => handleAddToCalendar('ics')} className="flex-1 text-xs font-semibold py-1 px-2 rounded-md bg-white dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors">Download .ics</button>
                     </div>
+                </div>
+            )}
+             {matchDetails.status === 'completed' && onRateSession && (
+                <div className="bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded-md">
+                    <h6 className="text-xs font-semibold text-center text-gray-700 dark:text-gray-300 mb-2">Session Feedback</h6>
+                    {matchDetails.rating ? (
+                        <div className="text-center">
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">You rated this session:</p>
+                            <div className="flex justify-center">
+                                <ReadOnlyStarRating rating={matchDetails.rating} />
+                            </div>
+                        </div>
+                    ) : (
+                         <div className="text-center">
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Rate your session with {user.name}:</p>
+                            <InteractiveStarRating onRate={(rating) => onRateSession(user.id, rating)} />
+                        </div>
+                    )}
                 </div>
             )}
         </div>
