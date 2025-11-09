@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Skill } from '../types';
+import { Skill, UserSkill } from '../types';
 
 interface SkillTagProps {
-  skill: Skill;
+  skill: Skill | UserSkill;
   type: 'teach' | 'learn';
   isHighlighted?: boolean;
   isVerified?: boolean;
@@ -15,7 +15,15 @@ const VerifiedIcon: React.FC = () => (
     </svg>
 );
 
+const StarIcon: React.FC<{ filled: boolean }> = ({ filled }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 inline-block ${filled ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-500'}`} viewBox="0 0 20 20" fill="currentColor">
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+);
+
 const SkillTag: React.FC<SkillTagProps> = ({ skill, type, isHighlighted = false, isVerified = false }) => {
+  const proficiency = (skill as UserSkill).proficiency;
+
   const baseClasses = "px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 flex items-center";
   
   const typeClasses = {
@@ -31,6 +39,11 @@ const SkillTag: React.FC<SkillTagProps> = ({ skill, type, isHighlighted = false,
     <span className={`${baseClasses} ${typeClasses[type]} ${highlightClasses}`}>
       {isVerified && <VerifiedIcon />}
       {skill.name}
+      {type === 'teach' && proficiency && (
+        <span className="ml-2 flex items-center" title={`Proficiency: ${proficiency}/3`}>
+            {[1, 2, 3].map(star => <StarIcon key={star} filled={star <= proficiency} />)}
+        </span>
+      )}
     </span>
   );
 };

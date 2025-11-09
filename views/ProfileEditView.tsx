@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { User, Skill } from '../types';
+import { User, Skill, UserSkill } from '../types';
 
 interface ProfileEditViewProps {
   currentUser: User;
@@ -11,16 +10,29 @@ interface ProfileEditViewProps {
 const ProfileEditView: React.FC<ProfileEditViewProps> = ({ currentUser, onSave, allSkills }) => {
   const [name, setName] = useState(currentUser.name);
   const [bio, setBio] = useState(currentUser.bio);
-  const [skillsToTeach, setSkillsToTeach] = useState<number[]>(currentUser.skillsToTeach.map(s => s.id));
+  // FIX: Store the full UserSkill object to preserve proficiency.
+  const [skillsToTeach, setSkillsToTeach] = useState<UserSkill[]>(currentUser.skillsToTeach);
   const [skillsToLearn, setSkillsToLearn] = useState<number[]>(currentUser.skillsToLearn.map(s => s.id));
 
   const handleSkillToggle = (skillId: number, list: 'teach' | 'learn') => {
-    const currentList = list === 'teach' ? skillsToTeach : skillsToLearn;
-    const setter = list === 'teach' ? setSkillsToTeach : setSkillsToLearn;
-    if (currentList.includes(skillId)) {
-      setter(currentList.filter(id => id !== skillId));
+    // FIX: Handle 'teach' list separately as it contains UserSkill objects.
+    if (list === 'teach') {
+      if (skillsToTeach.some(s => s.id === skillId)) {
+        setSkillsToTeach(skillsToTeach.filter(s => s.id !== skillId));
+      } else {
+        const skillToAdd = allSkills.find(s => s.id === skillId);
+        if (skillToAdd) {
+          const originalUserSkill = currentUser.skillsToTeach.find(s => s.id === skillId);
+          const proficiency = originalUserSkill ? originalUserSkill.proficiency : 1;
+          setSkillsToTeach([...skillsToTeach, { ...skillToAdd, proficiency }]);
+        }
+      }
     } else {
-      setter([...currentList, skillId]);
+      if (skillsToLearn.includes(skillId)) {
+        setSkillsToLearn(skillsToLearn.filter(id => id !== skillId));
+      } else {
+        setSkillsToLearn([...skillsToLearn, skillId]);
+      }
     }
   };
 
@@ -30,7 +42,8 @@ const ProfileEditView: React.FC<ProfileEditViewProps> = ({ currentUser, onSave, 
       ...currentUser,
       name,
       bio,
-      skillsToTeach: allSkills.filter(s => skillsToTeach.includes(s.id)),
+      // FIX: Assign the state directly as it's now the correct type UserSkill[].
+      skillsToTeach: skillsToTeach,
       skillsToLearn: allSkills.filter(s => skillsToLearn.includes(s.id)),
     };
     onSave(updatedUser);
@@ -75,7 +88,8 @@ const ProfileEditView: React.FC<ProfileEditViewProps> = ({ currentUser, onSave, 
                 <label key={skill.id} className="flex items-center space-x-3 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={skillsToTeach.includes(skill.id)}
+                    // FIX: Check for skill existence in the UserSkill array.
+                    checked={skillsToTeach.some(s => s.id === skill.id)}
                     onChange={() => handleSkillToggle(skill.id, 'teach')}
                     className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />

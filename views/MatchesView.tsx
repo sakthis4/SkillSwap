@@ -1,16 +1,17 @@
 
-
 import React from 'react';
-import { User, Match } from '../types';
+import { User, Match, Skill } from '../types';
 import ProfileCard from '../components/ProfileCard';
 
 interface MatchesViewProps {
   currentUser: User;
   allUsers: User[];
   onUpdateStatus: (partnerId: number, status: Match['status']) => void;
+  onSessionProposalResponse: (partnerId: number, response: 'accepted' | 'declined') => void;
+  allSkills: Skill[];
 }
 
-const MatchesView: React.FC<MatchesViewProps> = ({ currentUser, allUsers, onUpdateStatus }) => {
+const MatchesView: React.FC<MatchesViewProps> = ({ currentUser, allUsers, onUpdateStatus, onSessionProposalResponse, allSkills }) => {
   const matchedUsers = currentUser.matches.map(match => {
     const user = allUsers.find(u => u.id === match.userId);
     return { user, matchDetails: match };
@@ -30,6 +31,8 @@ const MatchesView: React.FC<MatchesViewProps> = ({ currentUser, allUsers, onUpda
               currentUser={currentUser}
               matchDetails={matchDetails}
               onUpdateStatus={onUpdateStatus}
+              onSessionProposalResponse={onSessionProposalResponse}
+              allSkills={allSkills}
             />
           ))}
         </div>

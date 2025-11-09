@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Skill } from '../types';
+import { User, Skill, UserSkill } from '../types';
 
 interface SignUpViewProps {
   onSignUp: (newUserData: Omit<User, 'id' | 'avatar' | 'matches' | 'status' | 'level' | 'xp' | 'badges' | 'streak' | 'verifiedSkills'>) => void;
@@ -8,20 +8,41 @@ interface SignUpViewProps {
   allSkills: Skill[];
 }
 
+type TempUserSkill = {
+    id: number;
+    proficiency: 1 | 2 | 3;
+}
+
 const SignUpView: React.FC<SignUpViewProps> = ({ onSignUp, onShowLogin, allSkills }) => {
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
-  const [skillsToTeach, setSkillsToTeach] = useState<number[]>([]);
+  const [skillsToTeach, setSkillsToTeach] = useState<TempUserSkill[]>([]);
   const [skillsToLearn, setSkillsToLearn] = useState<number[]>([]);
   const [error, setError] = useState('');
+  const proficiencyLevels: { level: 1 | 2 | 3; name: string }[] = [
+      { level: 1, name: 'Beginner'},
+      { level: 2, name: 'Intermediate'},
+      { level: 3, name: 'Expert'},
+  ]
 
-  const handleSkillToggle = (skillId: number, list: 'teach' | 'learn') => {
-    const currentList = list === 'teach' ? skillsToTeach : skillsToLearn;
-    const setter = list === 'teach' ? setSkillsToTeach : setSkillsToLearn;
-    if (currentList.includes(skillId)) {
-      setter(currentList.filter(id => id !== skillId));
+  const handleTeachSkillToggle = (skillId: number) => {
+    const exists = skillsToTeach.some(s => s.id === skillId);
+    if (exists) {
+        setSkillsToTeach(skillsToTeach.filter(s => s.id !== skillId));
     } else {
-      setter([...currentList, skillId]);
+        setSkillsToTeach([...skillsToTeach, { id: skillId, proficiency: 1 }]);
+    }
+  };
+
+  const handleProficiencyChange = (skillId: number, proficiency: 1 | 2 | 3) => {
+    setSkillsToTeach(skillsToTeach.map(s => s.id === skillId ? { ...s, proficiency } : s));
+  };
+
+  const handleLearnSkillToggle = (skillId: number) => {
+    if (skillsToLearn.includes(skillId)) {
+        setSkillsToLearn(skillsToLearn.filter(id => id !== skillId));
+    } else {
+        setSkillsToLearn([...skillsToLearn, skillId]);
     }
   };
 
@@ -34,7 +55,10 @@ const SignUpView: React.FC<SignUpViewProps> = ({ onSignUp, onShowLogin, allSkill
     const newUserData = {
       name,
       bio,
-      skillsToTeach: allSkills.filter(s => skillsToTeach.includes(s.id)),
+      skillsToTeach: skillsToTeach.map(ts => {
+          const skillInfo = allSkills.find(s => s.id === ts.id);
+          return { ...skillInfo!, proficiency: ts.proficiency };
+      }),
       skillsToLearn: allSkills.filter(s => skillsToLearn.includes(s.id)),
     };
     onSignUp(newUserData);
@@ -78,17 +102,37 @@ const SignUpView: React.FC<SignUpViewProps> = ({ onSignUp, onShowLogin, allSkill
                 {/* Skills to Teach */}
                 <div>
                     <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Skills You Can Teach</h3>
-                    <div className="space-y-3 max-h-60 overflow-y-auto p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700">
+                    <div className="space-y-4 max-h-60 overflow-y-auto p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700">
                     {allSkills.map(skill => (
-                        <label key={`teach-${skill.id}`} className="flex items-center space-x-3 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={skillsToTeach.includes(skill.id)}
-                            onChange={() => handleSkillToggle(skill.id, 'teach')}
-                            className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-gray-700 dark:text-gray-300">{skill.name}</span>
-                        </label>
+                        <div key={`teach-${skill.id}`}>
+                            <label className="flex items-center space-x-3 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={skillsToTeach.some(s => s.id === skill.id)}
+                                    onChange={() => handleTeachSkillToggle(skill.id)}
+                                    className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="text-gray-700 dark:text-gray-300">{skill.name}</span>
+                            </label>
+                            {skillsToTeach.some(s => s.id === skill.id) && (
+                                <div className="pl-8 pt-2">
+                                    <div className="flex items-center space-x-2">
+                                        {proficiencyLevels.map(p => (
+                                             <label key={p.level} className="text-xs flex items-center cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name={`proficiency-${skill.id}`}
+                                                    checked={skillsToTeach.find(s => s.id === skill.id)?.proficiency === p.level}
+                                                    onChange={() => handleProficiencyChange(skill.id, p.level)}
+                                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                                />
+                                                <span className="ml-1.5 text-gray-600 dark:text-gray-400">{p.name}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     ))}
                     </div>
                 </div>
@@ -101,7 +145,7 @@ const SignUpView: React.FC<SignUpViewProps> = ({ onSignUp, onShowLogin, allSkill
                         <input
                             type="checkbox"
                             checked={skillsToLearn.includes(skill.id)}
-                            onChange={() => handleSkillToggle(skill.id, 'learn')}
+                            onChange={() => handleLearnSkillToggle(skill.id)}
                             className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                         />
                         <span className="text-gray-700 dark:text-gray-300">{skill.name}</span>

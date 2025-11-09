@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Skill, SkillSuggestion } from '../types';
+import { User, Skill, SkillSuggestion, UserSkill } from '../types';
 import { getSkillSuggestions } from '../services/geminiService';
 
 
@@ -23,28 +23,56 @@ const VerifiedIcon: React.FC<{ className?: string }> = ({ className = ''}) => (
     </svg>
 );
 
+const StarIcon: React.FC<{ filled: boolean }> = ({ filled }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 inline-block ${filled ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-500'}`} viewBox="0 0 20 20" fill="currentColor">
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+);
+
+type TempUserSkill = {
+    id: number;
+    proficiency: 1 | 2 | 3;
+};
 
 const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkills }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(currentUser.name);
   const [bio, setBio] = useState(currentUser.bio);
-  const [skillsToTeach, setSkillsToTeach] = useState<number[]>(currentUser.skillsToTeach.map(s => s.id));
+  const [skillsToTeach, setSkillsToTeach] = useState<TempUserSkill[]>(currentUser.skillsToTeach.map(s => ({id: s.id, proficiency: s.proficiency })));
   const [skillsToLearn, setSkillsToLearn] = useState<number[]>(currentUser.skillsToLearn.map(s => s.id));
   const [verifiedSkills, setVerifiedSkills] = useState<number[]>(currentUser.verifiedSkills);
   
   const [suggestions, setSuggestions] = useState<SkillSuggestion[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
+  
+  const proficiencyLevels: { level: 1 | 2 | 3; name: string }[] = [
+      { level: 1, name: 'Beginner'},
+      { level: 2, name: 'Intermediate'},
+      { level: 3, name: 'Expert'},
+  ];
 
-  const handleSkillToggle = (skillId: number, list: 'teach' | 'learn') => {
-    const currentList = list === 'teach' ? skillsToTeach : skillsToLearn;
-    const setter = list === 'teach' ? setSkillsToTeach : setSkillsToLearn;
-    if (currentList.includes(skillId)) {
-      setter(currentList.filter(id => id !== skillId));
+  const handleTeachSkillToggle = (skillId: number) => {
+    const exists = skillsToTeach.some(s => s.id === skillId);
+    if (exists) {
+        setSkillsToTeach(skillsToTeach.filter(s => s.id !== skillId));
     } else {
-      setter([...currentList, skillId]);
+        setSkillsToTeach([...skillsToTeach, { id: skillId, proficiency: 1 }]);
     }
   };
+
+  const handleProficiencyChange = (skillId: number, proficiency: 1 | 2 | 3) => {
+    setSkillsToTeach(skillsToTeach.map(s => s.id === skillId ? { ...s, proficiency } : s));
+  };
+  
+  const handleLearnSkillToggle = (skillId: number) => {
+    if (skillsToLearn.includes(skillId)) {
+        setSkillsToLearn(skillsToLearn.filter(id => id !== skillId));
+    } else {
+        setSkillsToLearn([...skillsToLearn, skillId]);
+    }
+  };
+
 
   const handleVerifySkill = (skillId: number) => {
     if (window.confirm("This would normally open a file upload dialog to submit proof of your skill (e.g., certificate, portfolio). For this demo, we'll mark this skill as verified. Proceed?")) {
@@ -58,19 +86,21 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
       ...currentUser,
       name,
       bio,
-      skillsToTeach: allSkills.filter(s => skillsToTeach.includes(s.id)),
+      skillsToTeach: skillsToTeach.map(ts => {
+          const skillInfo = allSkills.find(s => s.id === ts.id);
+          return { ...skillInfo!, proficiency: ts.proficiency };
+      }),
       skillsToLearn: allSkills.filter(s => skillsToLearn.includes(s.id)),
       verifiedSkills: verifiedSkills,
     };
     onSave(updatedUser);
-    setIsEditing(false); // Exit edit mode after saving
+    setIsEditing(false);
   };
   
   const handleCancel = () => {
-      // Reset form fields to original values
       setName(currentUser.name);
       setBio(currentUser.bio);
-      setSkillsToTeach(currentUser.skillsToTeach.map(s => s.id));
+      setSkillsToTeach(currentUser.skillsToTeach.map(s => ({id: s.id, proficiency: s.proficiency })));
       setSkillsToLearn(currentUser.skillsToLearn.map(s => s.id));
       setVerifiedSkills(currentUser.verifiedSkills);
       setIsEditing(false);
@@ -140,28 +170,47 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
               {/* Skills to Teach */}
               <div>
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Skills You Can Teach</h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700">
+                <div className="space-y-4 max-h-60 overflow-y-auto p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700">
                   {allSkills.map(skill => (
-                    <div key={skill.id} className="flex items-center justify-between">
-                        <label className="flex items-center space-x-3 cursor-pointer flex-grow">
-                        <input
-                            type="checkbox"
-                            checked={skillsToTeach.includes(skill.id)}
-                            onChange={() => handleSkillToggle(skill.id, 'teach')}
-                            className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-gray-700 dark:text-gray-300">{skill.name}</span>
-                        {verifiedSkills.includes(skill.id) && <VerifiedIcon className="h-4 w-4" />}
-                        </label>
-                        {skillsToTeach.includes(skill.id) && (
-                             <button 
-                                type="button"
-                                onClick={() => handleVerifySkill(skill.id)}
-                                disabled={verifiedSkills.includes(skill.id)}
-                                className="text-xs font-semibold px-2 py-0.5 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-green-100 text-green-800 hover:bg-green-200 disabled:bg-gray-200 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-900 dark:disabled:bg-gray-600"
-                            >
-                               {verifiedSkills.includes(skill.id) ? 'Verified' : 'Verify'}
-                            </button>
+                    <div key={`teach-edit-${skill.id}`}>
+                        <div className="flex items-center justify-between">
+                            <label className="flex items-center space-x-3 cursor-pointer flex-grow">
+                            <input
+                                type="checkbox"
+                                checked={skillsToTeach.some(s => s.id === skill.id)}
+                                onChange={() => handleTeachSkillToggle(skill.id)}
+                                className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <span className="text-gray-700 dark:text-gray-300">{skill.name}</span>
+                            {verifiedSkills.includes(skill.id) && <VerifiedIcon className="h-4 w-4" />}
+                            </label>
+                            {skillsToTeach.some(s => s.id === skill.id) && !verifiedSkills.includes(skill.id) && (
+                                <button 
+                                    type="button"
+                                    onClick={() => handleVerifySkill(skill.id)}
+                                    className="text-xs font-semibold px-2 py-0.5 rounded-md transition-colors bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-900"
+                                >
+                                Verify
+                                </button>
+                            )}
+                        </div>
+                        {skillsToTeach.some(s => s.id === skill.id) && (
+                            <div className="pl-8 pt-2">
+                                <div className="flex items-center space-x-2">
+                                    {proficiencyLevels.map(p => (
+                                         <label key={p.level} className="text-xs flex items-center cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name={`proficiency-${skill.id}`}
+                                                checked={skillsToTeach.find(s => s.id === skill.id)?.proficiency === p.level}
+                                                onChange={() => handleProficiencyChange(skill.id, p.level)}
+                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                            />
+                                            <span className="ml-1.5 text-gray-600 dark:text-gray-400">{p.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
                         )}
                     </div>
                   ))}
@@ -172,11 +221,11 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Skills You Want to Learn</h3>
                 <div className="space-y-3 max-h-60 overflow-y-auto p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700">
                   {allSkills.map(skill => (
-                    <label key={skill.id} className="flex items-center space-x-3 cursor-pointer">
+                    <label key={`learn-edit-${skill.id}`} className="flex items-center space-x-3 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={skillsToLearn.includes(skill.id)}
-                        onChange={() => handleSkillToggle(skill.id, 'learn')}
+                        onChange={() => handleLearnSkillToggle(skill.id)}
                         className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                       />
                       <span className="text-gray-700 dark:text-gray-300">{skill.name}</span>
@@ -265,14 +314,17 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                     <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Your Skills to Teach</h3>
-                    <div className="flex flex-wrap gap-2">
+                    <ul className="space-y-2">
                         {currentUser.skillsToTeach.map(s => (
-                            <span key={s.id} className="flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                {currentUser.verifiedSkills.includes(s.id) && <VerifiedIcon className="h-4 w-4 mr-1.5" />}
-                                {s.name}
-                            </span>
+                            <li key={s.id} className="flex items-center p-2 rounded-md bg-blue-50 dark:bg-blue-900/50">
+                                {currentUser.verifiedSkills.includes(s.id) && <VerifiedIcon className="h-5 w-5 mr-2" />}
+                                <span className="flex-grow text-gray-800 dark:text-gray-200">{s.name}</span>
+                                <span className="flex items-center text-sm" title={`Proficiency: ${s.proficiency}/3`}>
+                                    {[1, 2, 3].map(star => <StarIcon key={star} filled={star <= s.proficiency} />)}
+                                </span>
+                            </li>
                         ))}
-                    </div>
+                    </ul>
                 </div>
                  <div>
                     <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Your Skills to Learn</h3>

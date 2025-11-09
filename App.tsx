@@ -1,32 +1,42 @@
 
 import React, { useState, useMemo } from 'react';
-import { User, Message, Post, Match } from './types';
+import { User, Message, Post, Match, ManualCalendarEvent, SessionProposal } from './types';
 import { MOCK_USERS, MOCK_MESSAGES, SKILLS, MOCK_POSTS } from './constants';
 import Header from './components/Header';
 import ExploreView from './views/ExploreView';
 import MatchesView from './views/MatchesView';
 import MessagesView from './views/MessagesView';
-import LoginView from './views/LoginView';
+import HomeView from './views/HomeView';
 import SignUpView from './views/SignUpView';
 import VideoCallModal from './components/VideoCallModal';
 import ProfileView from './views/ProfileView';
 import FeedView from './views/FeedView';
 import CreatePostModal from './components/CreatePostModal';
 import AdminView from './views/AdminView';
+import LibraryView from './views/LibraryView';
+import CalendarView from './views/CalendarView';
+import MarketplaceView from './views/MarketplaceView';
+import { Language, translations } from './utils/translations';
 
-export type View = 'explore' | 'matches' | 'messages' | 'profile' | 'feed' | 'admin';
-type AuthView = 'login' | 'signup';
+
+export type View = 'explore' | 'matches' | 'messages' | 'profile' | 'feed' | 'admin' | 'library' | 'calendar' | 'marketplace';
+type AuthView = 'home' | 'signup';
 
 const App: React.FC = () => {
   const [allUsers, setAllUsers] = useState<User[]>(MOCK_USERS);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentView, setCurrentView] = useState<View>('explore');
-  const [authView, setAuthView] = useState<AuthView>('login');
+  const [currentView, setCurrentView] = useState<View>('matches');
+  const [authView, setAuthView] = useState<AuthView>('home');
   const [selectedChatUser, setSelectedChatUser] = useState<User | null>(null);
   const [videoCallPartner, setVideoCallPartner] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>(MOCK_POSTS);
   const [isCreatePostModalOpen, setCreatePostModalOpen] = useState(false);
   const [exploreIndex, setExploreIndex] = useState(0);
+  const [language, setLanguage] = useState<Language>('en');
+  const [manualCalendarEvents, setManualCalendarEvents] = useState<ManualCalendarEvent[]>([]);
+
+
+  const t = (key: keyof typeof translations.en) => translations[language][key] || translations.en[key];
   
   const updateBadges = (user: User): string[] => {
     const newBadges = new Set(user.badges);
@@ -58,7 +68,7 @@ const App: React.FC = () => {
     const user = allUsers.find(u => u.id === 1); // Login as user with ID 1
     if(user) {
       setCurrentUser(user);
-      setCurrentView('explore');
+      setCurrentView('matches');
       const initialChatPartner = allUsers.find(u => u.id === 2);
       if(initialChatPartner) {
           setSelectedChatUser(initialChatPartner);
@@ -90,13 +100,14 @@ const App: React.FC = () => {
     newUser.badges = updateBadges(newUser);
     setAllUsers(prev => [...prev, newUser]);
     setCurrentUser(newUser);
+    setCurrentView('matches');
   };
   
   const handleLogout = () => {
     setCurrentUser(null);
-    setCurrentView('explore');
+    setCurrentView('matches');
     setSelectedChatUser(null);
-    setAuthView('login');
+    setAuthView('home');
     setExploreIndex(0);
   };
 
@@ -246,26 +257,72 @@ const App: React.FC = () => {
   };
 
   const handleScheduleSession = (partnerId: number, sessionDate: string) => {
-      const formattedDate = new Date(sessionDate).toLocaleString([], {
-          dateStyle: 'medium',
-          timeStyle: 'short',
-      });
-      const systemMessage = `Session scheduled for ${formattedDate}`;
-
-      const updateUser = (user: User): User => ({
+      if (!currentUser) return;
+      const proposal: SessionProposal = {
+          proposerId: currentUser.id,
+          date: sessionDate,
+          status: 'pending',
+      };
+      
+      const updateUser = (user: User, partnerIdToUpdate: number): User => ({
           ...user,
-          matches: user.matches.map(m => m.userId === partnerId ? { ...m, scheduledSession: sessionDate } : m)
+          matches: user.matches.map(m => m.userId === partnerIdToUpdate ? { ...m, sessionProposal: proposal, scheduledSession: undefined } : m)
       });
       
-      if(currentUser && selectedChatUser && selectedChatUser.id === partnerId) {
-          const updatedCurrentUser = updateUser(currentUser);
+      const updatedCurrentUser = updateUser(currentUser, partnerId);
+      setCurrentUser(updatedCurrentUser);
+      setAllUsers(prev => prev.map(u => {
+          if (u.id === currentUser.id) return updatedCurrentUser;
+          if (u.id === partnerId) return updateUser(u, currentUser.id);
+          return u;
+      }));
+      
+      if (selectedChatUser?.id === partnerId) {
+          const formattedDate = new Date(sessionDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+          const systemMessage = `${currentUser.name} proposed a session for ${formattedDate}`;
+          handleSendMessage(systemMessage, true);
+      }
+  };
+
+  const handleSessionProposalResponse = (partnerId: number, response: 'accepted' | 'declined') => {
+      if (!currentUser) return;
+
+      const currentMatch = currentUser.matches.find(m => m.userId === partnerId);
+      if (!currentMatch || !currentMatch.sessionProposal) return;
+      
+      const proposalDate = currentMatch.sessionProposal.date;
+      const formattedDate = new Date(proposalDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+
+      if (response === 'accepted') {
+          const updateUser = (user: User, partnerIdToUpdate: number): User => ({
+              ...user,
+              matches: user.matches.map(m => m.userId === partnerIdToUpdate ? { ...m, scheduledSession: proposalDate, sessionProposal: undefined } : m)
+          });
+          const updatedCurrentUser = updateUser(currentUser, partnerId);
           setCurrentUser(updatedCurrentUser);
           setAllUsers(prev => prev.map(u => {
               if (u.id === currentUser.id) return updatedCurrentUser;
-              if (u.id === partnerId) return updateUser(u);
+              if (u.id === partnerId) return updateUser(u, currentUser.id);
               return u;
           }));
-          handleSendMessage(systemMessage, true);
+          if (selectedChatUser?.id === partnerId || (allUsers.find(u => u.id === partnerId) && selectedChatUser?.id === partnerId)) {
+            handleSendMessage(`Session confirmed for ${formattedDate}!`, true);
+          }
+      } else { // declined
+          const updateUser = (user: User, partnerIdToUpdate: number): User => ({
+              ...user,
+              matches: user.matches.map(m => m.userId === partnerIdToUpdate ? { ...m, sessionProposal: undefined } : m)
+          });
+          const updatedCurrentUser = updateUser(currentUser, partnerId);
+          setCurrentUser(updatedCurrentUser);
+          setAllUsers(prev => prev.map(u => {
+              if (u.id === currentUser.id) return updatedCurrentUser;
+              if (u.id === partnerId) return updateUser(u, currentUser.id);
+              return u;
+          }));
+           if (selectedChatUser?.id === partnerId) {
+            handleSendMessage(`Session proposal for ${formattedDate} was declined.`, true);
+          }
       }
   };
 
@@ -317,13 +374,27 @@ const App: React.FC = () => {
       }
       setPosts(prev => prev.filter(p => p.id !== postIdToDelete));
   };
+  
+  const handleNavigateToChat = (partner: User) => {
+    setSelectedChatUser(partner);
+    setCurrentView('messages');
+  };
+  
+  const handleManualAddEvent = (title: string, date: string) => {
+      const newEvent: ManualCalendarEvent = {
+          id: Date.now(),
+          title,
+          date,
+      };
+      setManualCalendarEvents(prev => [...prev, newEvent]);
+  };
 
 
   if (!currentUser) {
     if (authView === 'signup') {
-        return <SignUpView onSignUp={handleSignUp} onShowLogin={() => setAuthView('login')} allSkills={SKILLS} />
+        return <SignUpView onSignUp={handleSignUp} onShowLogin={() => setAuthView('home')} allSkills={SKILLS} />
     }
-    return <LoginView onLogin={handleLogin} onAdminLogin={handleAdminLogin} onShowSignUp={() => setAuthView('signup')} />;
+    return <HomeView onLogin={handleLogin} onAdminLogin={handleAdminLogin} onShowSignUp={() => setAuthView('signup')} />;
   }
 
   return (
@@ -333,6 +404,9 @@ const App: React.FC = () => {
         currentView={currentView}
         setCurrentView={setCurrentView}
         onLogout={handleLogout}
+        language={language}
+        setLanguage={setLanguage}
+        t={t}
       />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {currentView === 'explore' && (
@@ -342,11 +416,15 @@ const App: React.FC = () => {
                 currentIndex={exploreIndex}
                 onSwipe={handleSwipe}
                 onGoBack={handleGoBack}
+                allSkills={SKILLS}
             />
         )}
-        {currentView === 'matches' && <MatchesView currentUser={currentUser} allUsers={allUsers} onUpdateStatus={handleUpdateMatchStatus} />}
+        {currentView === 'matches' && <MatchesView currentUser={currentUser} allUsers={allUsers} onUpdateStatus={handleUpdateMatchStatus} onSessionProposalResponse={handleSessionProposalResponse} allSkills={SKILLS}/>}
         {currentView === 'feed' && <FeedView currentUser={currentUser} allUsers={allUsers} posts={posts} onOpenCreatePost={() => setCreatePostModalOpen(true)} />}
         {currentView === 'profile' && <ProfileView currentUser={currentUser} onSave={handleProfileSave} allSkills={SKILLS} />}
+        {currentView === 'library' && <LibraryView allSkills={SKILLS} allUsers={allUsers} />}
+        {currentView === 'calendar' && <CalendarView currentUser={currentUser} allUsers={allUsers} onNavigateToChat={handleNavigateToChat} manualEvents={manualCalendarEvents} onManualAddEvent={handleManualAddEvent} allSkills={SKILLS} onStartVideoCall={handleStartVideoCall} />}
+        {currentView === 'marketplace' && <MarketplaceView />}
         {currentView === 'messages' && (
           <MessagesView 
             currentUser={currentUser}
@@ -358,6 +436,7 @@ const App: React.FC = () => {
             onAddReaction={handleAddReaction}
             onStartVideoCall={handleStartVideoCall}
             onScheduleSession={handleScheduleSession}
+            onSessionProposalResponse={handleSessionProposalResponse}
           />
         )}
         {currentView === 'admin' && currentUser.isAdmin && (
@@ -370,7 +449,7 @@ const App: React.FC = () => {
             />
         )}
       </main>
-      {videoCallPartner && <VideoCallModal partner={videoCallPartner} onClose={handleEndVideoCall} />}
+      {videoCallPartner && currentUser && <VideoCallModal currentUser={currentUser} partner={videoCallPartner} onClose={handleEndVideoCall} />}
       {isCreatePostModalOpen && <CreatePostModal onClose={() => setCreatePostModalOpen(false)} onCreatePost={handleCreatePost} />}
     </div>
   );

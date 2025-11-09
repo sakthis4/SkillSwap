@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { User, Message, Match } from '../types';
 import ChatWindow from '../components/ChatWindow';
@@ -15,6 +14,7 @@ interface MessagesViewProps {
   onAddReaction: (messageId: number, reaction: string) => void;
   onStartVideoCall: (partner: User) => void;
   onScheduleSession: (partnerId: number, sessionDate: string) => void;
+  onSessionProposalResponse: (partnerId: number, response: 'accepted' | 'declined') => void;
 }
 
 const MessagesView: React.FC<MessagesViewProps> = ({ 
@@ -26,9 +26,11 @@ const MessagesView: React.FC<MessagesViewProps> = ({
     onSendMessage,
     onAddReaction,
     onStartVideoCall,
-    onScheduleSession
+    onScheduleSession,
+    onSessionProposalResponse
 }) => {
   const chatPartners = allUsers.filter(user => currentUser.matches.some(m => m.userId === user.id));
+  const matchDetails = currentUser.matches.find(m => m.userId === selectedChatUser?.id);
 
   return (
     <div>
@@ -68,6 +70,8 @@ const MessagesView: React.FC<MessagesViewProps> = ({
                 onAddReaction={onAddReaction}
                 onStartVideoCall={onStartVideoCall}
                 onScheduleSession={onScheduleSession}
+                onSessionProposalResponse={onSessionProposalResponse}
+                matchDetails={matchDetails}
             />
           ) : (
             <div className="flex items-center justify-center h-full">

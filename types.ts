@@ -1,14 +1,24 @@
 
-
 export interface Skill {
   id: number;
   name: string;
+}
+
+export interface UserSkill extends Skill {
+  proficiency: 1 | 2 | 3; // 1: Beginner, 2: Intermediate, 3: Expert
+}
+
+export interface SessionProposal {
+  proposerId: number;
+  date: string; // ISO date string
+  status: 'pending';
 }
 
 export interface Match {
   userId: number;
   status: 'not-started' | 'in-progress' | 'completed';
   scheduledSession?: string; // ISO date string
+  sessionProposal?: SessionProposal;
 }
 
 export interface User {
@@ -16,7 +26,7 @@ export interface User {
   name: string;
   avatar: string;
   bio: string;
-  skillsToTeach: Skill[];
+  skillsToTeach: UserSkill[];
   skillsToLearn: Skill[];
   matches: Match[]; // Array of Match objects
   status: 'online' | 'offline';
@@ -60,4 +70,10 @@ export interface Product {
 export interface SkillSuggestion {
   skill: string;
   reason: string;
+}
+
+export interface ManualCalendarEvent {
+  id: number;
+  title: string;
+  date: string; // ISO String
 }

@@ -1,10 +1,11 @@
 
-
 import React from 'react';
-import { User, Skill, Product, Match } from '../types';
+import { User, Skill, Product, Match, UserSkill } from '../types';
 import { MOCK_PRODUCTS } from '../constants';
 import SkillTag from './SkillTag';
 import Avatar from './Avatar';
+import { generateGoogleCalendarLink, downloadIcsFile } from '../utils/calendar';
+
 
 interface ProfileCardProps {
   user: User;
@@ -12,6 +13,8 @@ interface ProfileCardProps {
   onConnect?: (userId: number) => void;
   matchDetails?: Match;
   onUpdateStatus?: (partnerId: number, status: Match['status']) => void;
+  onSessionProposalResponse?: (partnerId: number, response: 'accepted' | 'declined') => void;
+  allSkills: Skill[];
 }
 
 const statusConfig = {
@@ -21,15 +24,36 @@ const statusConfig = {
 };
 
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect, matchDetails, onUpdateStatus }) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect, matchDetails, onUpdateStatus, onSessionProposalResponse, allSkills }) => {
   const isConnected = currentUser.matches.some(m => m.userId === user.id);
   const recommendedProducts = MOCK_PRODUCTS.filter(p => user.skillsToTeach.some(s => s.id === p.skillId));
   
-  const isSkillMatch = (skill: Skill, skillsList: Skill[]) => {
-      return skillsList.some(s => s.id === skill.id);
+  const isSkillMatch = (skillId: number, skillsList: (Skill | UserSkill)[]) => {
+      return skillsList.some(s => s.id === skillId);
   }
 
   const currentStatusConfig = matchDetails ? statusConfig[matchDetails.status] : null;
+  const proposal = matchDetails?.sessionProposal;
+
+  const handleAddToCalendar = (type: 'google' | 'ics') => {
+    if (!matchDetails?.scheduledSession) return;
+    
+    const userSkill = currentUser.skillsToTeach.find(s => user.skillsToLearn.some(ps => ps.id === s.id))?.name || 'a skill';
+    const partnerSkill = user.skillsToTeach.find(s => currentUser.skillsToLearn.some(cs => cs.id === s.id))?.name || 'a skill';
+
+    const event = {
+        title: `${partnerSkill} Session with ${user.name}`,
+        description: `A SkillSwap session.\n\nYou are learning: ${partnerSkill}.\nYou are teaching: ${userSkill}.`,
+        startTime: new Date(matchDetails.scheduledSession),
+        endTime: new Date(new Date(matchDetails.scheduledSession).getTime() + 60 * 60 * 1000), // Assume 1 hour
+    };
+
+    if (type === 'google') {
+        window.open(generateGoogleCalendarLink(event), '_blank');
+    } else {
+        downloadIcsFile(event);
+    }
+  };
 
   return (
     <div className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 transition-transform hover:scale-105 duration-300 flex flex-col`}>
@@ -83,7 +107,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect,
             <h4 className="font-semibold text-gray-700 dark:text-gray-200 mb-2">Wants to Learn:</h4>
             <div className="flex flex-wrap gap-2">
               {user.skillsToLearn.map(skill => (
-                <SkillTag key={skill.id} skill={skill} type="learn" isHighlighted={isSkillMatch(skill, currentUser.skillsToTeach)} />
+                <SkillTag key={skill.id} skill={skill} type="learn" isHighlighted={isSkillMatch(skill.id, currentUser.skillsToTeach)} />
               ))}
             </div>
           </div>
@@ -95,7 +119,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect,
                     key={skill.id} 
                     skill={skill} 
                     type="teach" 
-                    isHighlighted={isSkillMatch(skill, currentUser.skillsToLearn)} 
+                    isHighlighted={isSkillMatch(skill.id, currentUser.skillsToLearn)} 
                     isVerified={user.verifiedSkills.includes(skill.id)}
                 />
               ))}
@@ -131,26 +155,58 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, currentUser, onConnect,
         )}
       </div>
 
-      {matchDetails && onUpdateStatus && (
+      {matchDetails && (onUpdateStatus || onSessionProposalResponse) && (
         <div className="bg-gray-100 dark:bg-gray-800/50 p-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
-          <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Swap Progress</h5>
-          <div className="flex items-center space-x-2">
-            <span className={`w-3 h-3 rounded-full ${currentStatusConfig?.color}`}></span>
-            <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{currentStatusConfig?.text}</span>
-          </div>
-          {matchDetails.scheduledSession && (
-             <div className="text-xs text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-md">
-                <strong>Next Session:</strong> {new Date(matchDetails.scheduledSession).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
-             </div>
-          )}
-          {currentStatusConfig?.buttonText && currentStatusConfig.nextStatus && (
-            <button
-              onClick={() => onUpdateStatus(user.id, currentStatusConfig.nextStatus as Match['status'])}
-              className="w-full text-sm font-bold py-1.5 px-4 rounded-lg transition-colors duration-300 bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {currentStatusConfig.buttonText}
-            </button>
-          )}
+            <h5 className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Swap Progress
+            </h5>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                    <span className={`w-3 h-3 rounded-full ${currentStatusConfig?.color}`}></span>
+                    <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{currentStatusConfig?.text}</span>
+                </div>
+                {onUpdateStatus && currentStatusConfig?.buttonText && currentStatusConfig.nextStatus && (
+                     <button
+                        onClick={() => onUpdateStatus(user.id, currentStatusConfig.nextStatus as Match['status'])}
+                        className="text-xs font-bold py-1 px-2.5 rounded-md transition-colors duration-300 bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800/50 focus:ring-blue-500"
+                    >
+                        {currentStatusConfig.buttonText}
+                    </button>
+                )}
+            </div>
+            
+            {proposal && proposal.status === 'pending' && onSessionProposalResponse && (
+                <div className="bg-yellow-100 dark:bg-yellow-900/50 p-3 rounded-lg space-y-2">
+                    <p className="text-xs font-semibold text-yellow-800 dark:text-yellow-200">
+                        {proposal.proposerId === currentUser.id ? 'You proposed a session:' : `${user.name} proposed a session:`}
+                        <strong className="block mt-1 text-yellow-900 dark:text-yellow-100">{new Date(proposal.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</strong>
+                    </p>
+                    {proposal.proposerId !== currentUser.id && (
+                        <div className="flex space-x-2 pt-1">
+                            <button onClick={() => onSessionProposalResponse(user.id, 'accepted')} className="flex-1 text-xs font-bold py-1 px-2.5 rounded-md transition-colors bg-green-500 text-white hover:bg-green-600">Accept</button>
+                            <button onClick={() => onSessionProposalResponse(user.id, 'declined')} className="flex-1 text-xs font-bold py-1 px-2.5 rounded-md transition-colors bg-red-500 text-white hover:bg-red-600">Decline</button>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {matchDetails.scheduledSession && (
+                 <div className="bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded-md space-y-2">
+                    <div className="flex items-center text-xs text-gray-600 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                        </svg>
+                        <strong>Confirmed:</strong> <span className="ml-1.5">{new Date(matchDetails.scheduledSession).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                    </div>
+                     <div className="flex items-center space-x-2">
+                        <button onClick={() => handleAddToCalendar('google')} className="flex-1 text-xs font-semibold py-1 px-2 rounded-md bg-white dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors">Add to Google</button>
+                        <button onClick={() => handleAddToCalendar('ics')} className="flex-1 text-xs font-semibold py-1 px-2 rounded-md bg-white dark:bg-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors">Download .ics</button>
+                    </div>
+                </div>
+            )}
         </div>
       )}
 

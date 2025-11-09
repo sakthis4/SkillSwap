@@ -15,7 +15,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin, onAdminLogin, onShowSign
           Welcome to SkillSwap AI
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-12">
-          Peer-to-peer skill sharing with AI matching, gamified rewards, and a social community.
+          Everyone is a Teacher. Everyone is a Learner.
         </p>
         <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl">
             <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">Get Started</h2>

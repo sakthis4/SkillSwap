@@ -1,7 +1,7 @@
 
 
 import React, { useEffect } from 'react';
-import { User } from '../types';
+import { User, Skill } from '../types';
 import SwipeCard from '../components/SwipeCard';
 
 interface ExploreViewProps {
@@ -10,9 +10,10 @@ interface ExploreViewProps {
   currentIndex: number;
   onSwipe: (direction: 'left' | 'right', swipedUserId: number) => void;
   onGoBack: () => void;
+  allSkills: Skill[];
 }
 
-const ExploreView: React.FC<ExploreViewProps> = ({ currentUser, usersToExplore, currentIndex, onSwipe, onGoBack }) => {
+const ExploreView: React.FC<ExploreViewProps> = ({ currentUser, usersToExplore, currentIndex, onSwipe, onGoBack, allSkills }) => {
   const cardsToDisplay = usersToExplore.slice(currentIndex, currentIndex + 3);
   const currentUserCard = usersToExplore[currentIndex];
 
@@ -57,6 +58,7 @@ const ExploreView: React.FC<ExploreViewProps> = ({ currentUser, usersToExplore, 
                 currentUser={currentUser}
                 onSwipe={(dir) => onSwipe(dir, user.id)}
                 isInteractive={index === 0}
+                allSkills={allSkills}
               />
             </div>
           ))

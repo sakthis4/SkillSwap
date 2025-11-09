@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Message } from '../types';
+import { User, Message, Match } from '../types';
 import { getConversationStarters } from '../services/geminiService';
 import Avatar from './Avatar';
 
@@ -11,14 +12,18 @@ interface ChatWindowProps {
   onAddReaction: (messageId: number, reaction: string) => void;
   onStartVideoCall: (partner: User) => void;
   onScheduleSession: (partnerId: number, sessionDate: string) => void;
+  onSessionProposalResponse: (partnerId: number, response: 'accepted' | 'declined') => void;
+  matchDetails?: Match;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages, onSendMessage, onAddReaction, onStartVideoCall, onScheduleSession }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages, onSendMessage, onAddReaction, onStartVideoCall, onScheduleSession, onSessionProposalResponse, matchDetails }) => {
   const [inputText, setInputText] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const reactionEmojis = ['👍', '❤️', '😂', '🎉'];
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState('');
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -36,10 +41,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages,
   };
   
   const handleScheduleClick = () => {
-    const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const sessionDate = nextWeek.toISOString();
-    onScheduleSession(partner.id, sessionDate);
-  }
+    setIsScheduling(true);
+    // Pre-fill with a reasonable default (e.g., 3 days from now at 10:00 AM)
+    const defaultDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    defaultDate.setHours(10, 0, 0, 0);
+    // Format for datetime-local input: YYYY-MM-DDTHH:mm
+    const formattedDate = defaultDate.toISOString().substring(0, 16);
+    setScheduleDate(formattedDate);
+  };
+
+  const handleProposeSession = () => {
+      if (scheduleDate) {
+          onScheduleSession(partner.id, new Date(scheduleDate).toISOString());
+          setIsScheduling(false);
+      }
+  };
 
   const fetchSuggestions = async () => {
     setIsLoadingSuggestions(true);
@@ -54,9 +70,30 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages,
     }
     setIsLoadingSuggestions(false);
   };
+  
+  const proposal = matchDetails?.sessionProposal;
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-800 rounded-r-lg">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-800 rounded-r-lg relative">
+       {isScheduling && (
+            <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-20" onClick={() => setIsScheduling(false)}>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+                    <h3 className="text-lg font-bold mb-4">Propose a Session Time</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Select a date and time to propose to {partner.name}. They will be able to accept or decline.</p>
+                    <input
+                        type="datetime-local"
+                        value={scheduleDate}
+                        onChange={e => setScheduleDate(e.target.value)}
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <div className="mt-6 flex justify-end space-x-3">
+                        <button onClick={() => setIsScheduling(false)} className="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500">Cancel</button>
+                        <button onClick={handleProposeSession} disabled={!scheduleDate} className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-400">Propose</button>
+                    </div>
+                </div>
+            </div>
+       )}
+
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         <div className="flex items-center">
             <Avatar user={partner} size="md" showStatus={true} />
@@ -112,6 +149,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages,
         )}
         <div ref={messagesEndRef} />
       </div>
+
+      {proposal && proposal.status === 'pending' && (
+        <div className="p-4 m-4 border-t border-b border-gray-200 dark:border-gray-700 bg-yellow-50 dark:bg-yellow-900/50 text-center">
+            <p className="font-semibold text-sm text-yellow-800 dark:text-yellow-200">{proposal.proposerId === currentUser.id ? "You proposed a session" : `${partner.name} proposed a session`}</p>
+            <p className="text-sm text-yellow-700 dark:text-yellow-300">{new Date(proposal.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' })}</p>
+            {proposal.proposerId === partner.id && (
+                <div className="mt-2 space-x-2">
+                    <button onClick={() => onSessionProposalResponse(partner.id, 'accepted')} className="px-3 py-1 text-xs font-bold bg-green-500 text-white rounded-md hover:bg-green-600">Accept</button>
+                    <button onClick={() => onSessionProposalResponse(partner.id, 'declined')} className="px-3 py-1 text-xs font-bold bg-red-500 text-white rounded-md hover:bg-red-600">Decline</button>
+                </div>
+            )}
+            {proposal.proposerId === currentUser.id && <p className="text-xs text-gray-500 mt-2">Waiting for a response...</p>}
+        </div>
+      )}
+
 
       {suggestions.length > 0 && (
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">

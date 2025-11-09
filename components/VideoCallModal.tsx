@@ -1,14 +1,49 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { User } from '../types';
 
 interface VideoCallModalProps {
+  currentUser: User;
   partner: User;
   onClose: () => void;
 }
 
-const VideoCallModal: React.FC<VideoCallModalProps> = ({ partner, onClose }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+const ControlButton: React.FC<{
+  onClick: () => void;
+  title: string;
+  isActive?: boolean;
+  isDisabled?: boolean;
+  children: React.ReactNode;
+  variant?: 'default' | 'danger' | 'primary';
+}> = ({ onClick, title, isActive = false, isDisabled = false, children, variant = 'default' }) => {
+    let colorClasses = 'bg-gray-700 text-white hover:bg-gray-600';
+    if (variant === 'danger' || (variant === 'default' && isActive)) {
+      colorClasses = 'bg-red-600 text-white';
+    } else if (variant === 'primary' && isActive) {
+      colorClasses = 'bg-blue-600 text-white';
+    }
+
+    return (
+        <button
+            onClick={onClick}
+            title={title}
+            disabled={isDisabled}
+            className={`p-3 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${colorClasses}`}
+        >
+            {children}
+        </button>
+    );
+};
+
+
+const VideoCallModal: React.FC<VideoCallModalProps> = ({ currentUser, partner, onClose }) => {
+  const userVideoRef = useRef<HTMLVideoElement>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const screenStreamRef = useRef<MediaStream | null>(null);
+  
+  const [isMuted, setIsMuted] = useState(false);
+  const [isCameraOff, setIsCameraOff] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [isCameraError, setIsCameraError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -16,9 +51,9 @@ const VideoCallModal: React.FC<VideoCallModalProps> = ({ partner, onClose }) => 
     const startCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+        cameraStreamRef.current = stream;
+        if (userVideoRef.current) {
+          userVideoRef.current.srcObject = stream;
         }
         setIsCameraError(false);
       } catch (err) {
@@ -41,16 +76,78 @@ const VideoCallModal: React.FC<VideoCallModalProps> = ({ partner, onClose }) => 
     startCamera();
 
     return () => {
-      // Cleanup: stop the stream when the component unmounts
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (screenStreamRef.current) {
+        screenStreamRef.current.getTracks().forEach(track => track.stop());
       }
     };
   }, []);
+  
+  const stopScreenSharing = () => {
+      if (screenStreamRef.current) {
+        screenStreamRef.current.getTracks().forEach(track => track.stop());
+        screenStreamRef.current = null;
+      }
+      if (userVideoRef.current && cameraStreamRef.current) {
+        userVideoRef.current.srcObject = cameraStreamRef.current;
+        if (cameraStreamRef.current) {
+            cameraStreamRef.current.getVideoTracks().forEach(track => track.enabled = !isCameraOff);
+        }
+      }
+      setIsScreenSharing(false);
+  };
+  
+  const handleToggleScreenShare = async () => {
+    if (isScreenSharing) {
+        stopScreenSharing();
+    } else {
+        try {
+            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+            screenStreamRef.current = stream;
+            stream.getVideoTracks()[0].addEventListener('ended', () => {
+                stopScreenSharing();
+            });
+            if (userVideoRef.current) {
+                userVideoRef.current.srcObject = stream;
+            }
+            setIsScreenSharing(true);
+            if (cameraStreamRef.current) {
+                cameraStreamRef.current.getVideoTracks().forEach(track => track.enabled = false);
+            }
+        } catch (err) {
+            console.error("Error starting screen share:", err);
+        }
+    }
+  };
+  
+  const handleToggleMic = () => {
+    if (cameraStreamRef.current) {
+        cameraStreamRef.current.getAudioTracks().forEach(track => {
+            track.enabled = !track.enabled;
+        });
+        setIsMuted(prev => !prev);
+    }
+  };
+  
+  const handleToggleCamera = () => {
+      if(isScreenSharing) return;
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getVideoTracks().forEach(track => {
+            track.enabled = !track.enabled;
+        });
+        setIsCameraOff(prev => !prev);
+    }
+  };
+
 
   const handleClose = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+    if (cameraStreamRef.current) {
+      cameraStreamRef.current.getTracks().forEach(track => track.stop());
+    }
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach(track => track.stop());
     }
     onClose();
   }
@@ -65,17 +162,10 @@ const VideoCallModal: React.FC<VideoCallModalProps> = ({ partner, onClose }) => 
                 <div className="text-center">
                      <img src={partner.avatar} alt={partner.name} className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-blue-400" />
                      <p className="font-semibold text-xl">{partner.name}</p>
-                     <div className="flex justify-center items-center space-x-2 mt-4">
-                        <span className="h-2 w-2 bg-green-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
-                        <span className="h-2 w-2 bg-green-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
-                        <span className="h-2 w-2 bg-green-400 rounded-full animate-pulse"></span>
-                        <span className="text-gray-400 ml-2">Joining Live Video Session...</span>
-                    </div>
                 </div>
                  <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-lg text-sm">
                     {partner.name}
                  </div>
-                 <div className="absolute bottom-2 right-2 text-xs text-gray-500">Powered by Zoom integration</div>
             </div>
 
             {/* User's video */}
@@ -86,24 +176,47 @@ const VideoCallModal: React.FC<VideoCallModalProps> = ({ partner, onClose }) => 
                         {errorMessage}
                     </div>
                 ) : (
-                    <video ref={videoRef} autoPlay muted className="w-full h-full object-cover transform -scale-x-100"></video>
+                    <>
+                     <video ref={userVideoRef} autoPlay muted className={`w-full h-full object-contain ${!isScreenSharing ? 'transform -scale-x-100' : ''} ${isCameraOff && !isScreenSharing ? 'hidden' : ''}`}></video>
+                     {(isCameraOff && !isScreenSharing) && (
+                        <div className="text-center text-gray-400">
+                           <img src={currentUser.avatar} alt="Your avatar" className="w-24 h-24 rounded-full mx-auto mb-4 opacity-50" />
+                            <p>Camera is off</p>
+                        </div>
+                     )}
+                    </>
                 )}
                  <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-lg text-sm">
-                    You
+                    {isScreenSharing ? 'Your Screen' : 'You'}
                  </div>
             </div>
         </div>
         
         {/* Controls */}
-        <div className="flex justify-center py-4">
+        <div className="flex justify-center items-center space-x-4 py-4 bg-gray-900/50">
+            <ControlButton onClick={handleToggleMic} title={isMuted ? 'Unmute' : 'Mute'} isActive={isMuted}>
+                {isMuted ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5l14 14" /></svg>
+                ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                )}
+            </ControlButton>
+            <ControlButton onClick={handleToggleCamera} title={isCameraOff ? 'Turn camera on' : 'Turn camera off'} isActive={isCameraOff} isDisabled={isScreenSharing}>
+                {isCameraOff ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.55a1 1 0 011.45.89V15.1a1 1 0 01-1.45.89L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M1 1l22 22" /></svg>
+                ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.55a1 1 0 011.45.89V15.1a1 1 0 01-1.45.89L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                )}
+            </ControlButton>
+             <ControlButton onClick={handleToggleScreenShare} title={isScreenSharing ? 'Stop sharing' : 'Share screen'} variant="primary" isActive={isScreenSharing}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+             </ControlButton>
             <button
               onClick={handleClose}
-              className="bg-red-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-red-700 transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-red-500/50 flex items-center space-x-2"
+              className="bg-red-600 text-white font-bold py-3 px-6 rounded-full hover:bg-red-700 transition-colors flex items-center space-x-2"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-telephone-x-fill" viewBox="0 0 16 16">
-                  <path fillRule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.28 1.465l-2.13 2.13a1.08 1.08 0 0 0-.288.701l-1.27 4.243a.5.5 0 0 0 .49.589h.035a.5.5 0 0 0 .42-.23l.16-.298a1.43 1.43 0 0 0-.21-.399l-.875-1.46a.5.5 0 0 1 .17-.707l2.63-1.753a.5.5 0 0 0 .163-.448l.26-2.503a.5.5 0 0 1 .49-.45h.035a.5.5 0 0 1 .42.23l.85,1.274c.12.18.25.348.39.508l-1.12,1.12a.5.5 0 0 0-.163.448l-.26,2.503a.5.5 0 0 0 .49.45h.035a.5.5 0 0 0 .42-.23l2.06-2.06a.5.5 0 0 1 .708 0l.707.707a.5.5 0 0 1 0 .708l-2.06 2.06a.5.5 0 0 0-.23.42h.035a.5.5 0 0 0 .45.49l2.503.26a.5.5 0 0 0 .448-.163l1.753-2.63a.5.5 0 0 1 .707-.17l1.46.875c.15.09.32.17.5.21l.298.16a.5.5 0 0 0 .23.42h.035a.5.5 0 0 0 .589-.49l-4.243-1.27a1.08 1.08 0 0 0-.701-.288l-2.13-2.13c-.491-.165-1.042-.049-1.465.28l-2.46 2.46a1.745 1.745 0 0 1-2.61-.164L1.885.51zM11.96 8.54a.5.5 0 0 0-.707 0L9.5 10.293 7.75 8.54a.5.5 0 0 0-.707.708L8.793 11l-1.75 1.75a.5.5 0 0 0 .707.707L9.5 11.707l1.75 1.75a.5.5 0 0 0 .707-.707L10.207 11l1.75-1.75a.5.5 0 0 0 0-.708z"/>
-                </svg>
-              <span>Leave Session</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                <span>Leave</span>
             </button>
         </div>
       </div>

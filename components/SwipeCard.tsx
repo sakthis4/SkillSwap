@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { User } from '../types';
+import { User, Skill, UserSkill } from '../types';
 import SkillTag from './SkillTag';
 import Avatar from './Avatar';
 
@@ -9,9 +9,10 @@ interface SwipeCardProps {
   currentUser: User;
   onSwipe: (direction: 'left' | 'right') => void;
   isInteractive: boolean;
+  allSkills: Skill[];
 }
 
-const SwipeCard: React.FC<SwipeCardProps> = ({ user, currentUser, onSwipe, isInteractive }) => {
+const SwipeCard: React.FC<SwipeCardProps> = ({ user, currentUser, onSwipe, isInteractive, allSkills }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -57,7 +58,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ user, currentUser, onSwipe, isInt
     transition: isDragging ? 'none' : 'transform 0.3s ease-out',
   };
   
-  const isSkillMatch = (skill, skillsList) => skillsList.some(s => s.id === skill.id);
+  const isSkillMatch = (skillId: number, skillsList: (Skill | UserSkill)[]) => skillsList.some(s => s.id === skillId);
 
   return (
     <div
@@ -114,7 +115,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ user, currentUser, onSwipe, isInt
                         key={skill.id} 
                         skill={skill} 
                         type="teach" 
-                        isHighlighted={isSkillMatch(skill, currentUser.skillsToLearn)} 
+                        isHighlighted={isSkillMatch(skill.id, currentUser.skillsToLearn)} 
                         isVerified={user.verifiedSkills.includes(skill.id)}
                     />
                 ))}
@@ -124,7 +125,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({ user, currentUser, onSwipe, isInt
                 <h4 className="font-semibold text-gray-700 dark:text-gray-200 mb-2 text-sm">Wants to Learn:</h4>
                 <div className="flex flex-wrap gap-2">
                 {user.skillsToLearn.map(skill => (
-                    <SkillTag key={skill.id} skill={skill} type="learn" isHighlighted={isSkillMatch(skill, currentUser.skillsToTeach)} />
+                    <SkillTag key={skill.id} skill={skill} type="learn" isHighlighted={isSkillMatch(skill.id, currentUser.skillsToTeach)} />
                 ))}
                 </div>
             </div>
