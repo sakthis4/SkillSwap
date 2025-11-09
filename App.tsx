@@ -1,7 +1,7 @@
 
 
 import React, { useState, useMemo } from 'react';
-import { User, Message, Post, Match, ManualCalendarEvent, SessionProposal } from './types';
+import { User, Message, Post, Match, ManualCalendarEvent, SessionProposal, TFunction } from './types';
 import { MOCK_USERS, MOCK_MESSAGES, SKILLS, MOCK_POSTS } from './constants';
 import Header from './components/Header';
 import ExploreView from './views/ExploreView';
@@ -37,7 +37,16 @@ const App: React.FC = () => {
   const [manualCalendarEvents, setManualCalendarEvents] = useState<ManualCalendarEvent[]>([]);
 
 
-  const t = (key: keyof typeof translations.en) => translations[language][key] || translations.en[key];
+  const t: TFunction = (key, replacements) => {
+    let translation = translations[language][key] || translations.en[key];
+    if (replacements) {
+        Object.keys(replacements).forEach(rKey => {
+            const regex = new RegExp(`{${rKey}}`, 'g');
+            translation = translation.replace(regex, String(replacements[rKey]));
+        });
+    }
+    return translation;
+  };
   
   const updateBadges = (user: User): string[] => {
     const newBadges = new Set(user.badges);
@@ -313,7 +322,7 @@ const App: React.FC = () => {
       
       if (selectedChatUser?.id === partnerId) {
           const formattedDate = new Date(sessionDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
-          const systemMessage = `${currentUser.name} proposed a session for ${formattedDate}`;
+          const systemMessage = t('systemSessionProposed', { name: currentUser.name, date: formattedDate });
           handleSendMessage(systemMessage, true);
       }
   };
@@ -340,7 +349,7 @@ const App: React.FC = () => {
               return u;
           }));
           if (selectedChatUser?.id === partnerId || (allUsers.find(u => u.id === partnerId) && selectedChatUser?.id === partnerId)) {
-            handleSendMessage(`Session confirmed for ${formattedDate}!`, true);
+            handleSendMessage(t('systemSessionConfirmed', { date: formattedDate }), true);
           }
       } else { // declined
           const updateUser = (user: User, partnerIdToUpdate: number): User => ({
@@ -355,13 +364,13 @@ const App: React.FC = () => {
               return u;
           }));
            if (selectedChatUser?.id === partnerId) {
-            handleSendMessage(`Session proposal for ${formattedDate} was declined.`, true);
+            handleSendMessage(t('systemSessionDeclined', { date: formattedDate }), true);
           }
       }
   };
 
   const handleDeleteUser = (userIdToDelete: number) => {
-    if (!window.confirm(`Are you sure you want to permanently delete this user and all their data? This action cannot be undone.`)) {
+    if (!window.confirm(t('deleteUserConfirm'))) {
       return;
     }
 
@@ -403,7 +412,7 @@ const App: React.FC = () => {
   };
 
   const handleDeletePost = (postIdToDelete: number) => {
-      if (!window.confirm('Are you sure you want to delete this post?')) {
+      if (!window.confirm(t('deletePostConfirm'))) {
           return;
       }
       setPosts(prev => prev.filter(p => p.id !== postIdToDelete));
@@ -426,9 +435,9 @@ const App: React.FC = () => {
 
   if (!currentUser) {
     if (authView === 'signup') {
-        return <SignUpView onSignUp={handleSignUp} onShowLogin={() => setAuthView('home')} allSkills={SKILLS} />
+        return <SignUpView onSignUp={handleSignUp} onShowLogin={() => setAuthView('home')} allSkills={SKILLS} t={t} />
     }
-    return <HomeView onLogin={handleLogin} onAdminLogin={handleAdminLogin} onShowSignUp={() => setAuthView('signup')} />;
+    return <HomeView onLogin={handleLogin} onAdminLogin={handleAdminLogin} onShowSignUp={() => setAuthView('signup')} t={t} />;
   }
 
   return (
@@ -451,14 +460,15 @@ const App: React.FC = () => {
                 onSwipe={handleSwipe}
                 onGoBack={handleGoBack}
                 allSkills={SKILLS}
+                t={t}
             />
         )}
-        {currentView === 'matches' && <MatchesView currentUser={currentUser} allUsers={allUsers} onUpdateStatus={handleUpdateMatchStatus} onSessionProposalResponse={handleSessionProposalResponse} allSkills={SKILLS} onRateSession={handleRateSession}/>}
-        {currentView === 'feed' && <FeedView currentUser={currentUser} allUsers={allUsers} posts={posts} onOpenCreatePost={() => setCreatePostModalOpen(true)} />}
-        {currentView === 'profile' && <ProfileView currentUser={currentUser} onSave={handleProfileSave} allSkills={SKILLS} />}
-        {currentView === 'library' && <LibraryView allSkills={SKILLS} allUsers={allUsers} />}
-        {currentView === 'calendar' && <CalendarView currentUser={currentUser} allUsers={allUsers} onNavigateToChat={handleNavigateToChat} manualEvents={manualCalendarEvents} onManualAddEvent={handleManualAddEvent} allSkills={SKILLS} onStartVideoCall={handleStartVideoCall} />}
-        {currentView === 'marketplace' && <MarketplaceView />}
+        {currentView === 'matches' && <MatchesView currentUser={currentUser} allUsers={allUsers} onUpdateStatus={handleUpdateMatchStatus} onSessionProposalResponse={handleSessionProposalResponse} allSkills={SKILLS} onRateSession={handleRateSession} t={t} />}
+        {currentView === 'feed' && <FeedView currentUser={currentUser} allUsers={allUsers} posts={posts} onOpenCreatePost={() => setCreatePostModalOpen(true)} t={t} />}
+        {currentView === 'profile' && <ProfileView currentUser={currentUser} onSave={handleProfileSave} allSkills={SKILLS} t={t} />}
+        {currentView === 'library' && <LibraryView allSkills={SKILLS} allUsers={allUsers} t={t} />}
+        {currentView === 'calendar' && <CalendarView currentUser={currentUser} allUsers={allUsers} onNavigateToChat={handleNavigateToChat} manualEvents={manualCalendarEvents} onManualAddEvent={handleManualAddEvent} allSkills={SKILLS} onStartVideoCall={handleStartVideoCall} t={t} />}
+        {currentView === 'marketplace' && <MarketplaceView t={t} />}
         {currentView === 'messages' && (
           <MessagesView 
             currentUser={currentUser}
@@ -471,6 +481,7 @@ const App: React.FC = () => {
             onStartVideoCall={handleStartVideoCall}
             onScheduleSession={handleScheduleSession}
             onSessionProposalResponse={handleSessionProposalResponse}
+            t={t}
           />
         )}
         {currentView === 'admin' && currentUser.isAdmin && (
@@ -480,11 +491,12 @@ const App: React.FC = () => {
                 posts={posts}
                 onDeleteUser={handleDeleteUser}
                 onDeletePost={handleDeletePost}
+                t={t}
             />
         )}
       </main>
-      {videoCallPartner && currentUser && <VideoCallModal currentUser={currentUser} partner={videoCallPartner} onClose={handleEndVideoCall} />}
-      {isCreatePostModalOpen && <CreatePostModal onClose={() => setCreatePostModalOpen(false)} onCreatePost={handleCreatePost} />}
+      {videoCallPartner && currentUser && <VideoCallModal currentUser={currentUser} partner={videoCallPartner} onClose={handleEndVideoCall} t={t} />}
+      {isCreatePostModalOpen && <CreatePostModal onClose={() => setCreatePostModalOpen(false)} onCreatePost={handleCreatePost} t={t} />}
     </div>
   );
 };

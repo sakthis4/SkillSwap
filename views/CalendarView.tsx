@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { User, ManualCalendarEvent, Skill, UserSkill } from '../types';
+import { User, ManualCalendarEvent, Skill, UserSkill, TFunction } from '../types';
 import Avatar from '../components/Avatar';
 import { generateGoogleCalendarLink, downloadIcsFile } from '../utils/calendar';
 
@@ -11,9 +11,10 @@ interface CalendarViewProps {
   onManualAddEvent: (title: string, date: string) => void;
   allSkills: Skill[];
   onStartVideoCall: (partner: User) => void;
+  t: TFunction;
 }
 
-const CalendarView: React.FC<CalendarViewProps> = ({ currentUser, allUsers, onNavigateToChat, manualEvents, onManualAddEvent, onStartVideoCall }) => {
+const CalendarView: React.FC<CalendarViewProps> = ({ currentUser, allUsers, onNavigateToChat, manualEvents, onManualAddEvent, onStartVideoCall, t }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [newEventTitle, setNewEventTitle] = useState('');
@@ -34,7 +35,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ currentUser, allUsers, onNa
         return {
           id: `swap-${match.userId}-${match.scheduledSession}`,
           date: new Date(match.scheduledSession!),
-          title: `Session with ${partner.name}`,
+          title: t('sessionWith', { name: partner.name }),
           type: 'swap' as const,
           partner,
           userSkill,
@@ -42,7 +43,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ currentUser, allUsers, onNa
         };
       })
       .filter((event): event is NonNullable<typeof event> => event !== null);
-  }, [currentUser, allUsers]);
+  }, [currentUser, allUsers, t]);
   
   const personalGoalEvents = useMemo(() => {
       return manualEvents.map(event => ({
@@ -98,19 +99,19 @@ const CalendarView: React.FC<CalendarViewProps> = ({ currentUser, allUsers, onNa
 
   return (
     <div className="animate-fade-in">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Your Calendar</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">{t('yourCalendar')}</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Calendar Grid */}
             <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
                 <div className="flex items-center justify-between mb-6">
-                    <button onClick={() => changeMonth(-1)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" aria-label="Previous month">
+                    <button onClick={() => changeMonth(-1)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" aria-label={t('prevMonth')}>
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                     </button>
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
                         {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                     </h2>
-                    <button onClick={() => changeMonth(1)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" aria-label="Next month">
+                    <button onClick={() => changeMonth(1)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" aria-label={t('nextMonth')}>
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                     </button>
                 </div>
@@ -158,32 +159,33 @@ const CalendarView: React.FC<CalendarViewProps> = ({ currentUser, allUsers, onNa
                                 event={event}
                                 onNavigateToChat={onNavigateToChat}
                                 onStartVideoCall={onStartVideoCall}
+                                t={t}
                             />
                         ))
                     ) : (
                         <div className="text-center py-10">
                              <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">No events scheduled for this day.</p>
+                            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">{t('noEventsForDay')}</p>
                         </div>
                     )}
                     </div>
                  </div>
                  <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-                    <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Add Personal Goal</h2>
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">{t('addPersonalGoal')}</h2>
                     <form onSubmit={handleAddEventSubmit} className="space-y-4">
                         <div>
-                            <label htmlFor="event-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Goal Title</label>
+                            <label htmlFor="event-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('goalTitle')}</label>
                             <input
                                 type="text"
                                 id="event-title"
                                 value={newEventTitle}
                                 onChange={e => setNewEventTitle(e.target.value)}
-                                placeholder="e.g., Practice Guitar"
+                                placeholder={t('goalTitlePlaceholder')}
                                 className="mt-1 w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
                         <div>
-                            <label htmlFor="event-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date & Time</label>
+                            <label htmlFor="event-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('dateTime')}</label>
                             <input
                                 type="datetime-local"
                                 id="event-date"
@@ -197,7 +199,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ currentUser, allUsers, onNa
                             className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300 disabled:bg-blue-400"
                             disabled={!newEventTitle.trim() || !newEventDate}
                         >
-                            Add Goal
+                            {t('addGoal')}
                         </button>
                     </form>
                 </div>
@@ -219,18 +221,32 @@ const CalendarView: React.FC<CalendarViewProps> = ({ currentUser, allUsers, onNa
 
 type EventType = ReturnType<typeof useMemo<any[], any>>[0];
 
+// FIX: Define the missing SkillInfo component
+const SkillInfo: React.FC<{ type: 'learn' | 'teach', skill: Skill | UserSkill, t: TFunction }> = ({ type, skill, t }) => {
+    const isLearn = type === 'learn';
+    const label = isLearn ? t('youAreLearning') : t('youAreTeaching');
+    const colorClass = isLearn ? 'text-indigo-600 dark:text-indigo-300' : 'text-blue-600 dark:text-blue-300';
+
+    return (
+        <p className="text-xs text-gray-600 dark:text-gray-400">
+            <span className={`font-semibold ${colorClass}`}>{label}:</span> {skill.name}
+        </p>
+    );
+};
+
 const EventCard: React.FC<{
     event: EventType,
     onNavigateToChat: (partner: User) => void,
     onStartVideoCall: (partner: User) => void
-}> = ({ event, onNavigateToChat, onStartVideoCall }) => {
+    t: TFunction;
+}> = ({ event, onNavigateToChat, onStartVideoCall, t }) => {
 
     const handleAddToCalendar = (type: 'google' | 'ics') => {
         let description = `A session for ${event.title}.`;
         if (event.type === 'swap') {
             description = `A SkillSwap session with ${event.partner.name}.`;
-            if(event.partnerSkill) description += `\nYou are learning: ${event.partnerSkill.name}.`;
-            if(event.userSkill) description += `\nYou are teaching: ${event.userSkill.name}.`;
+            if(event.partnerSkill) description += `\n${t('youAreLearning')}: ${event.partnerSkill.name}.`;
+            if(event.userSkill) description += `\n${t('youAreTeaching')}: ${event.userSkill.name}.`;
         }
 
         const calendarEvent = {
@@ -262,10 +278,10 @@ const EventCard: React.FC<{
                 <div className="mt-4 space-y-4">
                     {/* Skill Details */}
                     <div className="space-y-2">
-                        {event.partnerSkill && <SkillInfo type="learn" skill={event.partnerSkill} />}
-                        {event.userSkill && <SkillInfo type="teach" skill={event.userSkill} />}
+                        {event.partnerSkill && <SkillInfo type="learn" skill={event.partnerSkill} t={t} />}
+                        {event.userSkill && <SkillInfo type="teach" skill={event.userSkill} t={t} />}
                         {!event.partnerSkill && event.userSkill && (
-                           <p className="text-xs text-gray-500 dark:text-gray-400 italic">This is a one-way session (e.g., for points or pro-bono).</p>
+                           <p className="text-xs text-gray-500 dark:text-gray-400 italic">{t('oneWaySession')}</p>
                         )}
                     </div>
 
@@ -278,19 +294,19 @@ const EventCard: React.FC<{
                             </div>
                             <div className="flex items-center space-x-2">
                                 {isToday && (
-                                    <button onClick={() => onStartVideoCall(event.partner)} className="flex items-center space-x-1.5 text-sm font-semibold text-white bg-green-500 hover:bg-green-600 px-3 py-1 rounded-md transition-colors" title="Start Video Call">
+                                    <button onClick={() => onStartVideoCall(event.partner)} className="flex items-center space-x-1.5 text-sm font-semibold text-white bg-green-500 hover:bg-green-600 px-3 py-1 rounded-md transition-colors" title={t('startVideoCall')}>
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path d="M3.75 3.75A.75.75 0 003 4.5v11a.75.75 0 00.75.75h12.5a.75.75 0 00.75-.75v-11a.75.75 0 00-.75-.75h-1.25a.75.75 0 00-.75.75v1.25H5.5V4.5a.75.75 0 00-.75-.75H3.75z" /><path d="M17 6.75a.75.75 0 00-1.13-.648l-3.56 2.135V12l3.56 2.136A.75.75 0 0017 13.5v-6.75z" /></svg>
-                                        <span>Start Call</span>
+                                        <span>{t('startCall')}</span>
                                     </button>
                                 )}
                                 <button onClick={() => onNavigateToChat(event.partner)} className="text-sm font-semibold text-blue-600 hover:underline">
-                                    Chat
+                                    {t('chat')}
                                 </button>
                             </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                            <button onClick={() => handleAddToCalendar('google')} className="flex-1 text-xs font-semibold py-1 px-2 rounded-md bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm">Add to Google</button>
-                            <button onClick={() => handleAddToCalendar('ics')} className="flex-1 text-xs font-semibold py-1 px-2 rounded-md bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm">Download .ics</button>
+                            <button onClick={() => handleAddToCalendar('google')} className="flex-1 text-xs font-semibold py-1 px-2 rounded-md bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm">{t('addToGoogle')}</button>
+                            <button onClick={() => handleAddToCalendar('ics')} className="flex-1 text-xs font-semibold py-1 px-2 rounded-md bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm">{t('downloadIcs')}</button>
                         </div>
                     </div>
                 </div>
@@ -299,20 +315,5 @@ const EventCard: React.FC<{
     );
 };
 
-const SkillInfo: React.FC<{ type: 'learn' | 'teach', skill: Skill | UserSkill }> = ({ type, skill }) => {
-    const isLearning = type === 'learn';
-    const Icon = isLearning ?
-        (<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-500" viewBox="0 0 20 20" fill="currentColor"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L9 9.48l-4.148 2.24a1 1 0 00-.54 1.838L9 16.48l4.148-2.24a1 1 0 00.54-1.838L9 10.162l6.606-3.242a1 1 0 000-1.84l-7-3z" /></svg>) :
-        (<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500" viewBox="0 0 20 20" fill="currentColor"><path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" /></svg>);
-
-    return (
-        <div className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
-            {Icon}
-            <span>
-                <span className="font-semibold">{isLearning ? 'You are learning' : 'You are teaching'}:</span> {skill.name}
-            </span>
-        </div>
-    );
-}
-
+// FIX: Add default export to resolve module import error
 export default CalendarView;

@@ -1,13 +1,15 @@
 
+
 import React, { useState, useMemo } from 'react';
-import { Skill, User } from '../types';
+import { Skill, User, TFunction } from '../types';
 
 interface LibraryViewProps {
   allSkills: Skill[];
   allUsers: User[];
+  t: TFunction;
 }
 
-const LibraryView: React.FC<LibraryViewProps> = ({ allSkills, allUsers }) => {
+const LibraryView: React.FC<LibraryViewProps> = ({ allSkills, allUsers, t }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const skillData = useMemo(() => {
@@ -27,8 +29,8 @@ const LibraryView: React.FC<LibraryViewProps> = ({ allSkills, allUsers }) => {
   return (
     <div>
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">Skill Library</h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400">A Living Library of Human Skills.</p>
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{t('libraryTitle')}</h1>
+        <p className="text-xl text-gray-600 dark:text-gray-400">{t('librarySubtitle')}</p>
       </div>
 
       <div className="max-w-2xl mx-auto mb-8">
@@ -36,7 +38,7 @@ const LibraryView: React.FC<LibraryViewProps> = ({ allSkills, allUsers }) => {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search for a skill..."
+          placeholder={t('searchPlaceholder')}
           className="w-full px-5 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
         />
       </div>
@@ -46,9 +48,9 @@ const LibraryView: React.FC<LibraryViewProps> = ({ allSkills, allUsers }) => {
           <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
               <tr>
-                <th scope="col" className="px-6 py-3 rounded-l-lg">Skill</th>
-                <th scope="col" className="px-6 py-3 text-center">Teachers</th>
-                <th scope="col" className="px-6 py-3 text-center rounded-r-lg">Learners</th>
+                <th scope="col" className="px-6 py-3 rounded-l-lg">{t('skill')}</th>
+                <th scope="col" className="px-6 py-3 text-center">{t('teachers')}</th>
+                <th scope="col" className="px-6 py-3 text-center rounded-r-lg">{t('learners')}</th>
               </tr>
             </thead>
             <tbody>
@@ -70,7 +72,7 @@ const LibraryView: React.FC<LibraryViewProps> = ({ allSkills, allUsers }) => {
         </div>
         {filteredSkills.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                <p>No skills found for "{searchTerm}".</p>
+                <p>{t('noSkillsFound', { searchTerm })}</p>
             </div>
         )}
       </div>

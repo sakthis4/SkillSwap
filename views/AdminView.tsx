@@ -1,6 +1,7 @@
 
+
 import React, { useState } from 'react';
-import { User, Post } from '../types';
+import { User, Post, TFunction } from '../types';
 import Avatar from '../components/Avatar';
 
 interface AdminViewProps {
@@ -9,6 +10,7 @@ interface AdminViewProps {
   onDeleteUser: (userId: number) => void;
   onDeletePost: (postId: number) => void;
   currentUser: User;
+  t: TFunction;
 }
 
 const StatCard: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
@@ -18,7 +20,7 @@ const StatCard: React.FC<{ label: string; value: string | number }> = ({ label, 
     </div>
 );
 
-const AdminView: React.FC<AdminViewProps> = ({ allUsers, posts, onDeleteUser, onDeletePost }) => {
+const AdminView: React.FC<AdminViewProps> = ({ allUsers, posts, onDeleteUser, onDeletePost, t }) => {
     const [expandedUserId, setExpandedUserId] = useState<number | null>(null);
 
     const totalUsers = allUsers.length;
@@ -33,35 +35,35 @@ const AdminView: React.FC<AdminViewProps> = ({ allUsers, posts, onDeleteUser, on
     };
 
     const statusConfig = {
-        'not-started': { text: 'Not Started', color: 'text-gray-500 dark:text-gray-400' },
-        'in-progress': { text: 'In Progress', color: 'text-yellow-500 dark:text-yellow-400' },
-        'completed': { text: 'Completed', color: 'text-green-500 dark:text-green-400' },
+        'not-started': { text: t('statusNotStarted'), color: 'text-gray-500 dark:text-gray-400' },
+        'in-progress': { text: t('statusInProgress'), color: 'text-yellow-500 dark:text-yellow-400' },
+        'completed': { text: t('statusCompleted'), color: 'text-green-500 dark:text-green-400' },
     };
 
     return (
         <div className="space-y-12">
             <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-                <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">Platform overview and management tools.</p>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('adminDashboard')}</h1>
+                <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">{t('adminDashboardSubtitle')}</p>
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <StatCard label="Total Users" value={totalUsers} />
-                    <StatCard label="Total Posts" value={totalPosts} />
-                    <StatCard label="Total Connections" value={totalConnections} />
+                    <StatCard label={t('totalUsers')} value={totalUsers} />
+                    <StatCard label={t('totalPosts')} value={totalPosts} />
+                    <StatCard label={t('totalConnections')} value={totalConnections} />
                 </div>
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">User Management</h2>
+                <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">{t('userManagement')}</h2>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
-                                <th scope="col" className="px-6 py-3">User</th>
-                                <th scope="col" className="px-6 py-3">Level</th>
-                                <th scope="col" className="px-6 py-3">Completed</th>
-                                <th scope="col" className="px-6 py-3">In Progress</th>
-                                <th scope="col" className="px-6 py-3">Scheduled</th>
-                                <th scope="col" className="px-6 py-3 text-right">Actions</th>
+                                <th scope="col" className="px-6 py-3">{t('userColumn')}</th>
+                                <th scope="col" className="px-6 py-3">{t('level')}</th>
+                                <th scope="col" className="px-6 py-3">{t('completedColumn')}</th>
+                                <th scope="col" className="px-6 py-3">{t('inProgressColumn')}</th>
+                                <th scope="col" className="px-6 py-3">{t('scheduledColumn')}</th>
+                                <th scope="col" className="px-6 py-3 text-right">{t('actionsColumn')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -89,14 +91,14 @@ const AdminView: React.FC<AdminViewProps> = ({ allUsers, posts, onDeleteUser, on
                                         <td className="px-6 py-4">{inProgressSwaps}</td>
                                         <td className="px-6 py-4">{scheduledSessions}</td>
                                         <td className="px-6 py-4 text-right">
-                                            <button onClick={(e) => { e.stopPropagation(); onDeleteUser(user.id); }} className="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
+                                            <button onClick={(e) => { e.stopPropagation(); onDeleteUser(user.id); }} className="font-medium text-red-600 dark:text-red-500 hover:underline">{t('delete')}</button>
                                         </td>
                                     </tr>
                                     {expandedUserId === user.id && (
                                         <tr className="bg-gray-50 dark:bg-gray-900/50">
                                             <td colSpan={6} className="p-4">
                                                 <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-inner">
-                                                    <h4 className="font-bold text-gray-800 dark:text-gray-200 mb-3 text-base">Swap Details for {user.name}</h4>
+                                                    <h4 className="font-bold text-gray-800 dark:text-gray-200 mb-3 text-base">{t('swapDetailsFor', { name: user.name })}</h4>
                                                     {user.matches.length > 0 ? (
                                                         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                                                             {user.matches.map(match => {
@@ -110,14 +112,14 @@ const AdminView: React.FC<AdminViewProps> = ({ allUsers, posts, onDeleteUser, on
                                                                         </div>
                                                                         <div className="text-right">
                                                                             <p><span className={`font-semibold ${statusConfig[match.status].color}`}>{statusConfig[match.status].text}</span></p>
-                                                                            {match.scheduledSession && <p className="text-xs text-gray-500 dark:text-gray-400">Scheduled: {new Date(match.scheduledSession).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</p>}
+                                                                            {match.scheduledSession && <p className="text-xs text-gray-500 dark:text-gray-400">{t('scheduledColumn')}: {new Date(match.scheduledSession).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</p>}
                                                                         </div>
                                                                     </li>
                                                                 );
                                                             })}
                                                         </ul>
                                                     ) : (
-                                                        <p className="text-gray-500 dark:text-gray-400">No matches to display.</p>
+                                                        <p className="text-gray-500 dark:text-gray-400">{t('noMatchesToDisplay')}</p>
                                                     )}
                                                 </div>
                                             </td>
@@ -132,15 +134,15 @@ const AdminView: React.FC<AdminViewProps> = ({ allUsers, posts, onDeleteUser, on
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-                <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">Content Moderation</h2>
+                <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">{t('contentModeration')}</h2>
                 <div className="overflow-x-auto">
                      <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
-                                <th scope="col" className="px-6 py-3">Post ID</th>
-                                <th scope="col" className="px-6 py-3">Author</th>
-                                <th scope="col" className="px-6 py-3">Caption</th>
-                                <th scope="col" className="px-6 py-3 text-right">Actions</th>
+                                <th scope="col" className="px-6 py-3">{t('postIdColumn')}</th>
+                                <th scope="col" className="px-6 py-3">{t('authorColumn')}</th>
+                                <th scope="col" className="px-6 py-3">{t('captionColumn')}</th>
+                                <th scope="col" className="px-6 py-3 text-right">{t('actionsColumn')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -152,7 +154,7 @@ const AdminView: React.FC<AdminViewProps> = ({ allUsers, posts, onDeleteUser, on
                                     <td className="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">{author?.name || 'Unknown'}</td>
                                     <td className="px-6 py-4 max-w-sm truncate">{post.caption}</td>
                                     <td className="px-6 py-4 text-right">
-                                        <button onClick={() => onDeletePost(post.id)} className="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
+                                        <button onClick={() => onDeletePost(post.id)} className="font-medium text-red-600 dark:text-red-500 hover:underline">{t('delete')}</button>
                                     </td>
                                 </tr>
                                 )}

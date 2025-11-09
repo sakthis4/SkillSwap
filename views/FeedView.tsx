@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Post } from '../types';
+import { User, Post, TFunction } from '../types';
 import Avatar from '../components/Avatar';
 
 interface FeedViewProps {
@@ -7,17 +7,18 @@ interface FeedViewProps {
   allUsers: User[];
   posts: Post[];
   onOpenCreatePost: () => void;
+  t: TFunction;
 }
 
-const FeedView: React.FC<FeedViewProps> = ({ allUsers, posts, onOpenCreatePost }) => {
+const FeedView: React.FC<FeedViewProps> = ({ allUsers, posts, onOpenCreatePost, t }) => {
   const findUserById = (id: number) => allUsers.find(u => u.id === id);
 
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Community Feed</h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400">See what skills others are sharing and working on.</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('feedTitle')}</h1>
+            <p className="text-lg text-gray-600 dark:text-gray-400">{t('feedSubtitle')}</p>
         </div>
         <button 
           onClick={onOpenCreatePost}
@@ -27,7 +28,7 @@ const FeedView: React.FC<FeedViewProps> = ({ allUsers, posts, onOpenCreatePost }
             <path d="M4.5 5.25a2.25 2.25 0 0 0-2.25 2.25v10.5a2.25 2.25 0 0 0 2.25 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25V7.5a2.25 2.25 0 0 0-2.25-2.25H4.5Z" />
             <path d="M19.5 6.75a.75.75 0 0 0-1.125-.632l-3.245 1.88V17.25l3.245 1.88a.75.75 0 0 0 1.125-.632V6.75Z" />
           </svg>
-          <span>Post Skill Clip</span>
+          <span>{t('postSkillClip')}</span>
         </button>
       </div>
       

@@ -1,6 +1,7 @@
 
+
 import React, { useState } from 'react';
-import { User, Skill, SkillSuggestion, UserSkill } from '../types';
+import { User, Skill, SkillSuggestion, TFunction } from '../types';
 import { getSkillSuggestions } from '../services/geminiService';
 
 
@@ -8,6 +9,7 @@ interface ProfileViewProps {
   currentUser: User;
   onSave: (updatedUser: User) => void;
   allSkills: Skill[];
+  t: TFunction;
 }
 
 const StatCard: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
@@ -19,7 +21,7 @@ const StatCard: React.FC<{ label: string; value: string | number }> = ({ label, 
 
 const VerifiedIcon: React.FC<{ className?: string }> = ({ className = ''}) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={`inline-block text-green-600 dark:text-green-400 ${className}`} viewBox="0 0 20 20" fill="currentColor">
-        <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 18.333a11.954 11.954 0 007.834-13.334A1.995 1.995 0 0016 1c-2.31 0-4.438.78-6 2.053C8.438 1.78 6.31 1 4 1a1.995 1.995 0 00-1.834 3.999zM10 11.857l-3.218 1.692a.5.5 0 01-.725-.529l.614-3.582-2.6-2.534a.5.5 0 01.277-.852l3.598-.522L9.63 2.91a.5.5 0 01.894 0l1.608 3.268 3.598.522a.5.5 0 01.277.852l-2.6 2.534.614 3.582a.5.5 0 01-.725.529L10 11.857z" clipRule="evenodd" />
+        <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 18.333a11.954 11.954 0 007.834-13.334A1.995 1.995 0 0016 1c-2.31 0-4.438.78-6 2.053C8.438 1.78 6.31 1 4 1a1.995 1.995 0 00-1.834 3.999zM10 11.857l-3.218 1.692a.5.5 0 01-.725-.529l.614-3.582-2.6-2.534a.5.5 0 01.277-.852l3.598-.522L9.63 2.91a.5.5 0 01.894 0l1.608 3.268 3.598.522a.5.5 0 01.277.852l-2.6 2.534.614 3.582a.5.5 0 01-.725-.529L10 11.857z" clipRule="evenodd" />
     </svg>
 );
 
@@ -34,7 +36,7 @@ type TempUserSkill = {
     proficiency: 1 | 2 | 3;
 };
 
-const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkills }) => {
+const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkills, t }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(currentUser.name);
   const [bio, setBio] = useState(currentUser.bio);
@@ -47,9 +49,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
   
   const proficiencyLevels: { level: 1 | 2 | 3; name: string }[] = [
-      { level: 1, name: 'Beginner'},
-      { level: 2, name: 'Intermediate'},
-      { level: 3, name: 'Expert'},
+      { level: 1, name: t('proficiencyBeginner')},
+      { level: 2, name: t('proficiencyIntermediate')},
+      { level: 3, name: t('proficiencyExpert')},
   ];
 
   const handleTeachSkillToggle = (skillId: number) => {
@@ -75,7 +77,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
 
 
   const handleVerifySkill = (skillId: number) => {
-    if (window.confirm("This would normally open a file upload dialog to submit proof of your skill (e.g., certificate, portfolio). For this demo, we'll mark this skill as verified. Proceed?")) {
+    if (window.confirm(t('verifySkillPrompt'))) {
         setVerifiedSkills(prev => [...prev, skillId]);
     }
   };
@@ -125,15 +127,15 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          {isEditing ? 'Edit Your Profile' : 'Your Profile'}
+          {isEditing ? t('editProfile') : t('yourProfile')}
         </h1>
         {!isEditing ? (
             <button onClick={() => setIsEditing(true)} className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                Edit Profile
+                {t('editProfile')}
             </button>
         ) : (
              <button onClick={handleCancel} className="bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
-                Cancel
+                {t('cancel')}
             </button>
         )}
       </div>
@@ -142,7 +144,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
         <form onSubmit={handleSubmit} className="space-y-8 animate-fade-in">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Name
+                {t('yourName')}
               </label>
               <input
                 type="text"
@@ -155,7 +157,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
 
             <div>
               <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Bio
+                {t('yourBio')}
               </label>
               <textarea
                 id="bio"
@@ -169,7 +171,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Skills to Teach */}
               <div>
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Skills You Can Teach</h3>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">{t('skillsYouCanTeach')}</h3>
                 <div className="space-y-4 max-h-60 overflow-y-auto p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700">
                   {allSkills.map(skill => (
                     <div key={`teach-edit-${skill.id}`}>
@@ -190,7 +192,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
                                     onClick={() => handleVerifySkill(skill.id)}
                                     className="text-xs font-semibold px-2 py-0.5 rounded-md transition-colors bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-900"
                                 >
-                                Verify
+                                {t('verify')}
                                 </button>
                             )}
                         </div>
@@ -218,7 +220,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
               </div>
               {/* Skills to Learn */}
               <div>
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Skills You Want to Learn</h3>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">{t('skillsYouWantToLearn')}</h3>
                 <div className="space-y-3 max-h-60 overflow-y-auto p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700">
                   {allSkills.map(skill => (
                     <label key={`learn-edit-${skill.id}`} className="flex items-center space-x-3 cursor-pointer">
@@ -240,7 +242,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
                 type="submit"
                 className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               >
-                Save Profile
+                {t('save')} {t('profile')}
               </button>
             </div>
         </form>
@@ -253,27 +255,27 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
             </div>
 
             <div>
-                <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Your Progress</h3>
+                <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">{t('yourProgress')}</h3>
                 <div className="mb-4">
                     <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Level {currentUser.level}</span>
-                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{currentUser.xp}/100 XP</span>
+                        <span className="text-sm font-medium text-blue-700 dark:text-blue-300">{t('level')} {currentUser.level}</span>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{currentUser.xp}/100 {t('xp')}</span>
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                         <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${currentUser.xp}%` }}></div>
                     </div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <StatCard label="Total Matches" value={currentUser.matches.length} />
-                    <StatCard label="Current Streak" value={`${currentUser.streak} days`} />
-                    <StatCard label="Skills Taught" value={currentUser.skillsToTeach.length} />
-                    <StatCard label="Skills Learned" value={currentUser.skillsToLearn.length} />
+                    <StatCard label={t('totalMatches')} value={currentUser.matches.length} />
+                    <StatCard label={t('currentStreak')} value={`${currentUser.streak} days`} />
+                    <StatCard label={t('skillsTaught')} value={currentUser.skillsToTeach.length} />
+                    <StatCard label={t('skillsLearned')} value={currentUser.skillsToLearn.length} />
                 </div>
             </div>
             
             <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
-                <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">AI Skill Gap Analyzer</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">Discover new skills to enhance your profile. Our AI will suggest complementary skills based on what you can teach and what you want to learn.</p>
+                <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">{t('aiSkillAnalyzer')}</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">{t('aiSkillAnalyzerDesc')}</p>
                 <button onClick={handleAnalyzeSkills} disabled={isLoadingSuggestions} className="w-full sm:w-auto flex items-center justify-center bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-indigo-400 disabled:cursor-wait">
                     {isLoadingSuggestions ? (
                         <>
@@ -281,9 +283,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            Analyzing...
+                            {t('analyzing')}
                         </>
-                    ) : 'Analyze My Skills'}
+                    ) : t('analyzeMySkills')}
                 </button>
                 <div className="mt-6">
                     {suggestionError && <p className="text-red-500 text-center">{suggestionError}</p>}
@@ -301,7 +303,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
             </div>
 
             <div>
-                 <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Your Badges</h3>
+                 <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">{t('yourBadges')}</h3>
                  <div className="flex flex-wrap gap-2">
                     {currentUser.badges.map((badge, index) => (
                         <span key={index} className="text-sm font-semibold px-3 py-1.5 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded-full">
@@ -313,7 +315,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Your Skills to Teach</h3>
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">{t('yourSkillsToTeach')}</h3>
                     <ul className="space-y-2">
                         {currentUser.skillsToTeach.map(s => (
                             <li key={s.id} className="flex items-center p-2 rounded-md bg-blue-50 dark:bg-blue-900/50">
@@ -327,7 +329,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ currentUser, onSave, allSkill
                     </ul>
                 </div>
                  <div>
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Your Skills to Learn</h3>
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">{t('yourSkillsToLearn')}</h3>
                     <div className="flex flex-wrap gap-2">
                          {currentUser.skillsToLearn.map(s => <span key={s.id} className="px-3 py-1 text-sm font-semibold rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">{s.name}</span>)}
                     </div>

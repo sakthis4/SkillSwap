@@ -1,11 +1,13 @@
 
+
 import React, { useState } from 'react';
-import { User, Skill, UserSkill } from '../types';
+import { User, Skill, TFunction } from '../types';
 
 interface SignUpViewProps {
   onSignUp: (newUserData: Omit<User, 'id' | 'avatar' | 'matches' | 'status' | 'level' | 'xp' | 'badges' | 'streak' | 'verifiedSkills'>) => void;
   onShowLogin: () => void;
   allSkills: Skill[];
+  t: TFunction;
 }
 
 type TempUserSkill = {
@@ -13,16 +15,16 @@ type TempUserSkill = {
     proficiency: 1 | 2 | 3;
 }
 
-const SignUpView: React.FC<SignUpViewProps> = ({ onSignUp, onShowLogin, allSkills }) => {
+const SignUpView: React.FC<SignUpViewProps> = ({ onSignUp, onShowLogin, allSkills, t }) => {
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [skillsToTeach, setSkillsToTeach] = useState<TempUserSkill[]>([]);
   const [skillsToLearn, setSkillsToLearn] = useState<number[]>([]);
   const [error, setError] = useState('');
   const proficiencyLevels: { level: 1 | 2 | 3; name: string }[] = [
-      { level: 1, name: 'Beginner'},
-      { level: 2, name: 'Intermediate'},
-      { level: 3, name: 'Expert'},
+      { level: 1, name: t('proficiencyBeginner')},
+      { level: 2, name: t('proficiencyIntermediate')},
+      { level: 3, name: t('proficiencyExpert')},
   ]
 
   const handleTeachSkillToggle = (skillId: number) => {
@@ -49,7 +51,7 @@ const SignUpView: React.FC<SignUpViewProps> = ({ onSignUp, onShowLogin, allSkill
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !bio.trim() || skillsToTeach.length === 0 || skillsToLearn.length === 0) {
-        setError('Please fill out all fields and select at least one skill to teach and one to learn.');
+        setError(t('signupError'));
         return;
     }
     const newUserData = {
@@ -68,32 +70,32 @@ const SignUpView: React.FC<SignUpViewProps> = ({ onSignUp, onShowLogin, allSkill
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4">
         <div className="max-w-4xl w-full">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">Create Your SkillSwap Profile</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">{t('createProfileTitle')}</h1>
             <form onSubmit={handleSubmit} className="space-y-8">
                 <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Your Name
+                    {t('yourName')}
                 </label>
                 <input
                     type="text"
                     id="name"
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    placeholder="e.g., Jane Doe"
+                    placeholder={t('yourNamePlaceholder')}
                     className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 </div>
 
                 <div>
                 <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Your Bio
+                    {t('yourBio')}
                 </label>
                 <textarea
                     id="bio"
                     rows={3}
                     value={bio}
                     onChange={e => setBio(e.target.value)}
-                    placeholder="Tell others a bit about yourself and what you're passionate about."
+                    placeholder={t('yourBioPlaceholder')}
                     className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 </div>
@@ -101,7 +103,7 @@ const SignUpView: React.FC<SignUpViewProps> = ({ onSignUp, onShowLogin, allSkill
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Skills to Teach */}
                 <div>
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Skills You Can Teach</h3>
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">{t('skillsYouCanTeach')}</h3>
                     <div className="space-y-4 max-h-60 overflow-y-auto p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700">
                     {allSkills.map(skill => (
                         <div key={`teach-${skill.id}`}>
@@ -138,7 +140,7 @@ const SignUpView: React.FC<SignUpViewProps> = ({ onSignUp, onShowLogin, allSkill
                 </div>
                 {/* Skills to Learn */}
                 <div>
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Skills You Want to Learn</h3>
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">{t('skillsYouWantToLearn')}</h3>
                     <div className="space-y-3 max-h-60 overflow-y-auto p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700">
                     {allSkills.map(skill => (
                         <label key={`learn-${skill.id}`} className="flex items-center space-x-3 cursor-pointer">
@@ -162,14 +164,14 @@ const SignUpView: React.FC<SignUpViewProps> = ({ onSignUp, onShowLogin, allSkill
                         type="submit"
                         className="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                     >
-                        Create Profile & Start
+                        {t('createProfileAndStart')}
                     </button>
                     <button
                         type="button"
                         onClick={onShowLogin}
                         className="w-full sm:w-auto text-blue-600 dark:text-blue-400 font-semibold py-2 px-4 rounded-lg hover:underline"
                     >
-                        Back to Login
+                        {t('backToLogin')}
                     </button>
                 </div>
             </form>

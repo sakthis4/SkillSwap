@@ -1,3 +1,4 @@
+import { translations } from './utils/translations';
 
 
 export interface Skill {
@@ -81,3 +82,6 @@ export interface ManualCalendarEvent {
   title: string;
   date: string; // ISO String
 }
+
+export type TTranslations = typeof translations;
+export type TFunction = (key: keyof TTranslations['en'], replacements?: Record<string, string | number>) => string;

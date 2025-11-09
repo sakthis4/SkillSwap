@@ -1,6 +1,7 @@
 
+
 import React, { useState } from 'react';
-import { User } from '../types';
+import { User, TFunction } from '../types';
 import { View } from '../App';
 import Avatar from './Avatar';
 import { Language } from '../utils/translations';
@@ -12,7 +13,7 @@ interface HeaderProps {
   onLogout: () => void;
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: any) => string;
+  t: TFunction;
 }
 
 const NavLink: React.FC<{
@@ -89,7 +90,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, currentView, setCurrentVie
                 <NavLink isActive={currentView === 'explore'} onClick={() => setCurrentView('explore')}>{t('explore')}</NavLink>
                 <NavLink isActive={currentView === 'profile'} onClick={() => setCurrentView('profile')}>{t('profile')}</NavLink>
                 {currentUser.isAdmin && (
-                   <NavLink isActive={currentView === 'admin'} onClick={() => setCurrentView('admin')}>Admin</NavLink>
+                   <NavLink isActive={currentView === 'admin'} onClick={() => setCurrentView('admin')}>{t('admin')}</NavLink>
                 )}
               </div>
             </nav>
@@ -156,7 +157,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, currentView, setCurrentVie
             <MobileNavLink isActive={currentView === 'explore'} onClick={() => handleMobileLinkClick('explore')}>{t('explore')}</MobileNavLink>
             <MobileNavLink isActive={currentView === 'profile'} onClick={() => handleMobileLinkClick('profile')}>{t('profile')}</MobileNavLink>
             {currentUser.isAdmin && (
-                <MobileNavLink isActive={currentView === 'admin'} onClick={() => handleMobileLinkClick('admin')}>Admin</MobileNavLink>
+                <MobileNavLink isActive={currentView === 'admin'} onClick={() => handleMobileLinkClick('admin')}>{t('admin')}</MobileNavLink>
             )}
           </div>
           <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
@@ -164,7 +165,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, currentView, setCurrentVie
               <Avatar user={currentUser} size="md" showStatus={true} />
               <div className="ml-3">
                 <div className="text-base font-medium leading-none text-gray-800 dark:text-white">{currentUser.name}</div>
-                <div className="text-sm font-medium leading-none text-gray-500 dark:text-gray-400">Level {currentUser.level}</div>
+                <div className="text-sm font-medium leading-none text-gray-500 dark:text-gray-400">{t('level')} {currentUser.level}</div>
               </div>
             </div>
             <div className="mt-3 px-2 space-y-1">

@@ -1,6 +1,7 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Message, Match } from '../types';
+import { User, Message, Match, TFunction } from '../types';
 import { getConversationStarters } from '../services/geminiService';
 import Avatar from './Avatar';
 
@@ -14,9 +15,10 @@ interface ChatWindowProps {
   onScheduleSession: (partnerId: number, sessionDate: string) => void;
   onSessionProposalResponse: (partnerId: number, response: 'accepted' | 'declined') => void;
   matchDetails?: Match;
+  t: TFunction;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages, onSendMessage, onAddReaction, onStartVideoCall, onScheduleSession, onSessionProposalResponse, matchDetails }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages, onSendMessage, onAddReaction, onStartVideoCall, onScheduleSession, onSessionProposalResponse, matchDetails, t }) => {
   const [inputText, setInputText] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
@@ -78,8 +80,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages,
        {isScheduling && (
             <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-20" onClick={() => setIsScheduling(false)}>
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
-                    <h3 className="text-lg font-bold mb-4">Propose a Session Time</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Select a date and time to propose to {partner.name}. They will be able to accept or decline.</p>
+                    <h3 className="text-lg font-bold mb-4">{t('proposeSessionTitle')}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('proposeSessionDesc', { name: partner.name })}</p>
                     <input
                         type="datetime-local"
                         value={scheduleDate}
@@ -87,8 +89,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages,
                         className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <div className="mt-6 flex justify-end space-x-3">
-                        <button onClick={() => setIsScheduling(false)} className="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500">Cancel</button>
-                        <button onClick={handleProposeSession} disabled={!scheduleDate} className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-400">Propose</button>
+                        <button onClick={() => setIsScheduling(false)} className="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500">{t('cancel')}</button>
+                        <button onClick={handleProposeSession} disabled={!scheduleDate} className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-400">{t('propose')}</button>
                     </div>
                 </div>
             </div>
@@ -103,12 +105,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages,
             </div>
         </div>
         <div className="flex items-center space-x-2">
-            <button onClick={handleScheduleClick} className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-blue-500 transition-colors" title="Schedule Session">
+            <button onClick={handleScheduleClick} className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-blue-500 transition-colors" title={t('scheduleSession')}>
                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                </svg>
             </button>
-            <button onClick={() => onStartVideoCall(partner)} className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-blue-500 transition-colors" title="Start Video Call">
+            <button onClick={() => onStartVideoCall(partner)} className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-blue-500 transition-colors" title={t('startVideoCall')}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6">
                 <path d="M4.5 5.25a2.25 2.25 0 0 0-2.25 2.25v10.5a2.25 2.25 0 0 0 2.25 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25V7.5a2.25 2.25 0 0 0-2.25-2.25H4.5Z" />
                 <path d="M19.5 6.75a.75.75 0 0 0-1.125-.632l-3.245 1.88V17.25l3.245 1.88a.75.75 0 0 0 1.125-.632V6.75Z" />
@@ -152,22 +154,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages,
 
       {proposal && proposal.status === 'pending' && (
         <div className="p-4 m-4 border-t border-b border-gray-200 dark:border-gray-700 bg-yellow-50 dark:bg-yellow-900/50 text-center">
-            <p className="font-semibold text-sm text-yellow-800 dark:text-yellow-200">{proposal.proposerId === currentUser.id ? "You proposed a session" : `${partner.name} proposed a session`}</p>
+            <p className="font-semibold text-sm text-yellow-800 dark:text-yellow-200">{proposal.proposerId === currentUser.id ? t('sessionProposalAwaiting') : t('sessionProposalMessage', { name: partner.name })}</p>
             <p className="text-sm text-yellow-700 dark:text-yellow-300">{new Date(proposal.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' })}</p>
             {proposal.proposerId === partner.id && (
                 <div className="mt-2 space-x-2">
-                    <button onClick={() => onSessionProposalResponse(partner.id, 'accepted')} className="px-3 py-1 text-xs font-bold bg-green-500 text-white rounded-md hover:bg-green-600">Accept</button>
-                    <button onClick={() => onSessionProposalResponse(partner.id, 'declined')} className="px-3 py-1 text-xs font-bold bg-red-500 text-white rounded-md hover:bg-red-600">Decline</button>
+                    <button onClick={() => onSessionProposalResponse(partner.id, 'accepted')} className="px-3 py-1 text-xs font-bold bg-green-500 text-white rounded-md hover:bg-green-600">{t('accept')}</button>
+                    <button onClick={() => onSessionProposalResponse(partner.id, 'declined')} className="px-3 py-1 text-xs font-bold bg-red-500 text-white rounded-md hover:bg-red-600">{t('decline')}</button>
                 </div>
             )}
-            {proposal.proposerId === currentUser.id && <p className="text-xs text-gray-500 mt-2">Waiting for a response...</p>}
+            {proposal.proposerId === currentUser.id && <p className="text-xs text-gray-500 mt-2">{t('waitingForResponse')}</p>}
         </div>
       )}
 
 
       {suggestions.length > 0 && (
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-              <h4 className="text-sm font-semibold mb-2 text-gray-500 dark:text-gray-400">Suggested Replies:</h4>
+              <h4 className="text-sm font-semibold mb-2 text-gray-500 dark:text-gray-400">{t('suggestedReplies')}</h4>
               <div className="flex flex-wrap gap-2">
                   {suggestions.map((s, i) => (
                       <button key={i} onClick={() => { onSendMessage(s); setSuggestions([]); }} className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
@@ -184,7 +186,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages,
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Type your message..."
+            placeholder={t('typeYourMessage')}
             className="flex-1 w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
            <button 
@@ -192,7 +194,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, partner, messages,
               onClick={fetchSuggestions} 
               disabled={isLoadingSuggestions}
               className="p-2 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-50 transition-colors"
-              title="Generate Conversation Starters"
+              title={t('genConvStarters')}
             >
              {isLoadingSuggestions ? (
                 <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

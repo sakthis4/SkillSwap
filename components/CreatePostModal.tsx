@@ -1,12 +1,15 @@
 
+
 import React, { useState } from 'react';
+import { TFunction } from '../types';
 
 interface CreatePostModalProps {
   onClose: () => void;
   onCreatePost: (caption: string) => void;
+  t: TFunction;
 }
 
-const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onCreatePost }) => {
+const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onCreatePost, t }) => {
   const [caption, setCaption] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -20,7 +23,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onCreatePost
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg transform transition-all animate-zoom-in">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Create a New Post</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('createPostTitle')}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -31,20 +34,20 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onCreatePost
           <div className="p-6 space-y-4">
             <div>
               <label htmlFor="caption" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Caption
+                {t('caption')}
               </label>
               <textarea
                 id="caption"
                 rows={4}
                 value={caption}
                 onChange={e => setCaption(e.target.value)}
-                placeholder="Share something about your skill..."
+                placeholder={t('captionPlaceholder')}
                 className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Upload Skill Clip
+                {t('uploadClip')}
               </label>
               <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md">
                 <div className="space-y-1 text-center">
@@ -53,12 +56,12 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onCreatePost
                   </svg>
                   <div className="flex text-sm text-gray-600 dark:text-gray-400">
                     <label htmlFor="file-upload" className="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                      <span>Upload a file</span>
+                      <span>{t('uploadFile')}</span>
                       <input id="file-upload" name="file-upload" type="file" className="sr-only" disabled />
                     </label>
-                    <p className="pl-1">(Video upload is simulated)</p>
+                    <p className="pl-1">{t('uploadSimulated')}</p>
                   </div>
-                  <p className="text-xs text-gray-500">MP4, WEBM up to 50MB</p>
+                  <p className="text-xs text-gray-500">{t('uploadFormat')}</p>
                 </div>
               </div>
             </div>
@@ -69,7 +72,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ onClose, onCreatePost
               disabled={!caption.trim()}
               className="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              Post
+              {t('post')}
             </button>
           </div>
         </form>
